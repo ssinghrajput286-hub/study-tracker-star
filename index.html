@@ -171,6 +171,11 @@ h1,h2,h3,p{margin:0}
 .cdisp{position:sticky;top:0;z-index:2;background:var(--card);border-radius:24px;padding:14px 16px;box-shadow:var(--sh);text-align:right;margin-bottom:12px;min-height:124px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
 .cdisp .ch{font-size:12px;color:var(--mut);min-height:18px;word-break:break-all}
 .cdisp .ce{font-size:22px;word-break:break-all;min-height:32px;line-height:1.3}
+.cdisp .tk{display:inline-block;padding:7px 1px;border-radius:6px;cursor:pointer}
+.cdisp .tk.sel{background:rgba(var(--prgb),.28);outline:2px solid var(--p)}
+.cdisp .ccar{display:inline-block;width:2px;height:1.1em;background:var(--p);vertical-align:middle;margin:0 -1px;animation:cblink 1s steps(2) infinite}
+@keyframes cblink{50%{opacity:0}}
+.cdisp .chint{font-size:11px;color:var(--mut);margin-top:2px}
 .cdisp .cr{font-size:34px;font-weight:700;color:var(--p);word-break:break-all;min-height:46px}
 .kp{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .kp.adv{grid-template-columns:repeat(5,1fr);gap:6px}
@@ -581,31 +586,60 @@ function defaultState(){return {v:2,start:'2026-10-20',target:4,theme:'jamuni',t
  done:{"ar1:1":"pre","ar1:2":"pre","ar1:3":"pre","ar1:4":"pre","ar1:5":"pre","ar1:6":"pre","ar2:1":"pre","ar2:2":"pre","ar3:1":"pre","ar3:2":"pre","ar3:3":"pre","ar3:4":"pre","ar3:5":"pre","ar4:1":"pre","ar4:2":"pre","ar5:1":"pre","ar5:2":"pre","ar5:3":"pre","ar5:4":"pre","ar5:5":"pre","ar6:1":"pre","ar6:2":"pre","ar6:3":"pre","ar6:4":"pre","ar6:5":"pre","ar6:6":"pre","ar6:7":"pre","ar7:1":"pre","ar7:2":"pre","ar8:1":"pre","ar8:2":"2026-10-20","ar8:3":"2026-10-21","ar8:4":"2026-10-21","ar8:5":"2026-10-21","ar8:6":"2026-10-21","ar9:1":"2026-10-22","ar9:2":"2026-10-22","ar10:1":"2026-10-23","re1:1":"pre","re2:1":"pre","re2:2":"pre","re2:3":"pre","re2:4":"pre","re3:1":"pre","re3:2":"pre","re4:1":"pre","re4:2":"pre","re4:3":"pre","re5:1":"pre","re6:1":"pre","re6:2":"pre","re7:1":"pre","re7:2":"pre","re7:3":"pre","re8:1":"pre","re8:2":"pre","re9:1":"pre","re9:2":"pre","re9:3":"pre","re9:4":"pre","re9:5":"pre","re10:1":"pre","re10:2":"pre","re10:3":"pre","re11:1":"pre","re11:2":"pre","re11:3":"2026-10-20","re12:1":"2026-10-22","re12:2":"2026-10-23","re13:1":"2026-10-23","am1:1":"2026-10-22","am1:2":"2026-10-23"},ss:{},ssAuto:{},notes:{},missReason:{},holidays:{'2026-11-08':'Diwali','2026-11-15':'Chhath','2026-11-16':'Chhath'}}}
 
 /* ---------- storage ---------- */
-async function initStore(){
- var raw=null;
+function scoreRaw(raw){try{var o=JSON.parse(raw);return (o&&o.subjects)?(Object.keys(o.done||{}).length+Object.keys(o.notes||{}).length+1):-1}catch(e){return -1}}
+function stampRaw(raw){try{return +(JSON.parse(raw).savedAt)||0}catch(e){return 0}}
+async function recoverRaw(){
+ /* Main key bilkul nahi mila (naya file/path/key): purane keys, mirror ya snapshot se data dhundo */
+ var c=[];
+ try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(/^(lecture-tracker|study-tracker|lt-)/i.test(k)&&!/-probe$|-bkT$/.test(k))c.push(localStorage.getItem(k))}}catch(e){}
  if(window.storage&&typeof window.storage.get==='function'){
-  try{var r=await window.storage.get(KEY);raw=(r&&r.value!=null)?r.value:null;mode='window'}
+  var ks=[KEY+'-mirror'];try{if(typeof window.storage.list==='function'){var L=await window.storage.list('lecture-tracker');if(L&&L.keys)L.keys.forEach(function(x){if(ks.indexOf(x)<0&&x!==KEY&&!/-probe$/.test(x))ks.push(x)})}}catch(e){}
+  for(var j=0;j<ks.length;j++){try{var r=await window.storage.get(ks[j]);if(r&&r.value)c.push(r.value)}catch(e){}}
+ }
+ var best=null,bs=0,bt=0;
+ c.forEach(function(raw){var sc=scoreRaw(raw),t=stampRaw(raw);if(sc>bs||(sc===bs&&sc>0&&t>bt)){bs=sc;bt=t;best=raw}});
+ return bs>1?best:null}
+var recovered=false,hadStored=false;
+async function initStore(){
+ var rawW=null,rawL=null,raw=null,lsOK=false;
+ if(window.storage&&typeof window.storage.get==='function'){
+  try{var r=await window.storage.get(KEY);rawW=(r&&r.value!=null)?r.value:null;mode='window'}
   catch(e){try{var r2=await window.storage.set(KEY+'-probe','1');if(r2)mode='window'}catch(e2){}}
  }
- if(mode==='none'){try{raw=localStorage.getItem(KEY);localStorage.setItem(KEY+'-probe','1');mode='local'}catch(e){mode='none'}}
+ try{rawL=localStorage.getItem(KEY);localStorage.setItem(KEY+'-probe','1');lsOK=true}catch(e){}
+ if(mode==='none'&&lsOK)mode='local';
+ /* dono jagah data ho to jo naya hai wahi */
+ raw=rawW;if(rawL&&(!raw||stampRaw(rawL)>stampRaw(raw)))raw=rawL;
+ if(!raw){raw=await recoverRaw();recovered=!!raw}
  var d=defaultState();
- if(raw){try{var o=JSON.parse(raw);if(o&&o.subjects){if(!o.v||o.v<2){var nd=defaultState();o.subjects=nd.subjects;o.done={};o.notes={};o.v=2}for(var k in d){if(o[k]===undefined)o[k]=d[k]}if(!o.modeV){if(o.mode==='auto')o.mode='light';o.modeV=1}d=o}}catch(e){}}
- if(d.lecClr!==1){d.subjects.forEach(function(sj){sj.topics=[]});d.done={};d.ss={};d.ssAuto={};d.notes={};d.lecClr=1}
+ if(raw){try{var o=JSON.parse(raw);if(o&&o.subjects){hadStored=true;if(!o.v||o.v<2){var nd=defaultState();o.subjects=nd.subjects;o.done={};o.notes={};o.v=2}for(var k in d){if(o[k]===undefined)o[k]=d[k]}if(!o.modeV){if(o.mode==='auto')o.mode='light';o.modeV=1}d=o}}catch(e){}}
+ /* Purana safai-wala step ab sirf bilkul naye (khali) app par chalta hai, aapke maujooda data par kabhi nahi */
+ if(d.lecClr!==1){if(!hadStored){d.subjects.forEach(function(sj){sj.topics=[]});d.done={};d.ss={};d.ssAuto={};d.notes={}}d.lecClr=1}
  S=d;setWarn(mode==='none');
+ if(recovered){try{save()}catch(e){}}
 }
 function setWarn(on){var w=$('#warn');if(w)w.hidden=!on;warnOn=on}
 var warnOn=false;
 var remLast='';function remSync(){try{if(S&&window.AndroidBridge&&AndroidBridge.setReminders){var j=JSON.stringify(S.rem||[]);if(j!==remLast){remLast=j;AndroidBridge.setReminders(j)}}}catch(e){}}
 function save(){clearTimeout(saveTimer);saveTimer=setTimeout(doSave,120);remSync()}
 async function doSave(){
- var j=JSON.stringify(S);
+ S.savedAt=Date.now();
+ var j=JSON.stringify(S),ok=false;
  if(mode==='window'){
-  try{var r=await window.storage.set(KEY,j);if(r){setWarn(false);return}}catch(e){}
-  mode='none';try{localStorage.setItem(KEY,j);mode='local';setWarn(false);return}catch(e){}
-  setWarn(true);return;
- }
- if(mode==='local'){try{localStorage.setItem(KEY,j);setWarn(false);return}catch(e){mode='none'}}
- setWarn(true);
+  try{var r=await window.storage.set(KEY,j);if(r)ok=true}catch(e){}
+  if(!ok){mode='none';try{localStorage.setItem(KEY,j);mode='local';ok=true}catch(e){}}
+ }else if(mode==='local'){try{localStorage.setItem(KEY,j);ok=true}catch(e){mode='none'}}
+ setWarn(!ok);
+ if(ok)mirrorSave(j);
+}
+function mirrorSave(j){
+ /* Extra copy (doosri jagah) + 30 min me ek snapshot. Main save ko kabhi nahi rokta. */
+ try{
+  if(mode==='window'){if(j.length<2500000)localStorage.setItem(KEY+'-mirror',j)}
+  else if(mode==='local'&&window.storage&&typeof window.storage.set==='function'){window.storage.set(KEY+'-mirror',j).catch(function(){})}
+  var n=Date.now();
+  if(j.length<600000&&n-(+localStorage.getItem(KEY+'-bkT')||0)>1800000){var o=localStorage.getItem(KEY+'-bk1');if(o)localStorage.setItem(KEY+'-bk2',o);localStorage.setItem(KEY+'-bk1',j);localStorage.setItem(KEY+'-bkT',String(n))}
+ }catch(e){try{localStorage.removeItem(KEY+'-bk1');localStorage.removeItem(KEY+'-bk2');localStorage.removeItem(KEY+'-mirror')}catch(e2){}}
 }
 window.addEventListener('pagehide',function(){if(S&&mode==='local'){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}});
 
@@ -646,7 +680,13 @@ function hasHol(d){return Object.prototype.hasOwnProperty.call(S.holidays,d)}
 function isHol(d){return hasHol(d)||(S.weekOff>=0&&parse(d).getDay()===S.weekOff)}
 function holName(d){if(hasHol(d))return S.holidays[d];if(S.weekOff>=0&&parse(d).getDay()===S.weekOff)return 'Saptahik chhutti ('+WD[S.weekOff]+'war)';return undefined}
 function dayMet(d){if(isWE(d)&&!isHol(d))return specN(d)===2||countOn(d)>=S.target;var c=countOn(d);if(c>=S.target)return true;return c>0&&leftAtStart(d)-c===0}
-function missedDays(){var out=[],td=today(),d=S.start,n=0;while(d<td&&n++<800){if(!isHol(d)&&!dayMet(d)&&leftAtStart(d)>0)out.push(d);d=addDays(d,1)}return out}
+function missedDays(){var out=[],td=today(),d=S.start,n=0;
+ /* Sirf: (1) 25% ya usse kam wale din, (2) Chhutti wale din (jinpar koi tyohaar/event nahi) */
+ while(d<td&&n++<800){var low=dayP(d)<=25;
+  if(isHol(d)){if(hasHol(d)&&evOf(d).length===0&&low&&leftAtStart(d)>0)out.push(d)}
+  else if(!dayMet(d)&&low&&leftAtStart(d)>0)out.push(d);
+  d=addDays(d,1)}
+ return out}
 function streaks(){var td=today(),run=0,best=0,d=S.start,n=0;
  while(d<=td&&n++<800){if(!isHol(d)){if(dayMet(d)){run++;if(run>best)best=run}else if(d!==td&&leftAtStart(d)>0)run=0}d=addDays(d,1)}
  return {cur:run,best:best}}
@@ -669,6 +709,19 @@ if(window.matchMedia){try{matchMedia('(prefers-color-scheme: dark)').addEventLis
 /* ---------- views ---------- */
 function ring(p,size,sw,col,track,inner){var r=(size-sw)/2,c=2*Math.PI*r,off=c*(1-Math.min(p,100)/100),h=size/2;
  return '<div class="ring" role="img" aria-label="'+p+' percent" style="width:'+size+'px;height:'+size+'px"><svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'" aria-hidden="true"><circle cx="'+h+'" cy="'+h+'" r="'+r+'" fill="none" stroke="'+track+'" stroke-width="'+sw+'"/><circle cx="'+h+'" cy="'+h+'" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'" transform="rotate(-90 '+h+' '+h+')"/></svg><div class="rin">'+inner+'</div></div>'}
+/* Din ki ring: har subject ka hissa uske apne colour me (subject colour badle to ring bhi badle) */
+function dayRing(p,size,sw,col,track,inner){
+ var d=viewDate,tg=S.target||1,r=(size-sw)/2,c=2*Math.PI*r,h=size/2,segs=[],used=0,cnt={};
+ var spec=(isWE(d)?specN(d)*tg/2:0);
+ if(spec>0)segs.push({n:spec,col:col});
+ Object.keys(S.done||{}).forEach(function(k){if(S.done[k]===d){var f=findTopic(k.split(':')[0]);if(f)cnt[f.s.id]=(cnt[f.s.id]||0)+1}});
+ if(isWE(d)){Object.keys(S.ss||{}).forEach(function(k){if(S.ss[k]===d&&!isAuto(k)){var f=findTopic(k.split(':')[0]);if(f)cnt[f.s.id]=(cnt[f.s.id]||0)+1}})}
+ S.subjects.forEach(function(sj){if(cnt[sj.id])segs.push({n:cnt[sj.id],col:sj.color})});
+ var arcs='',single=segs.length<=1;
+ segs.forEach(function(sg){var len=Math.min(c-used,c*sg.n/tg);if(len<=0)return;
+  arcs+='<circle cx="'+h+'" cy="'+h+'" r="'+r+'" fill="none" stroke-width="'+sw+'" stroke-linecap="'+(single?'round':'butt')+'" style="stroke:'+sg.col+'" stroke-dasharray="'+len.toFixed(2)+' '+(c-len+1).toFixed(2)+'" stroke-dashoffset="'+(-used).toFixed(2)+'" transform="rotate(-90 '+h+' '+h+')"/>';
+  used+=len});
+ return '<div class="ring" role="img" aria-label="'+p+' percent" style="width:'+size+'px;height:'+size+'px"><svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'" aria-hidden="true"><circle cx="'+h+'" cy="'+h+'" r="'+r+'" fill="none" stroke="'+track+'" stroke-width="'+sw+'"/>'+arcs+'</svg><div class="rin">'+inner+'</div></div>'}
 function cur(){return nav.stack[nav.stack.length-1]}
 function msgFor(p,hol){if(hol)return 'Aaj aaram ka din 🌴';if(p===0)return 'Chalo shuru karte hain! 🚀';if(p<50)return 'Achhi shuruaat, lage raho 👍';if(p<100)return 'Bas thoda aur, tum kar loge 💪';return 'Aaj ka target poora! 🏆'}
 
@@ -677,7 +730,7 @@ function heroSpec(){var nm=specName(viewDate),a=specArr(viewDate),p=dayP(viewDat
  var box=function(i){return '<button data-act="spec" data-i="'+i+'" aria-pressed="'+(a[i]?'true':'false')+'" aria-label="'+nm+' '+(i+1)+'" style="flex:1;height:96px;border-radius:22px;border:3px '+(a[i]?'solid #14122B;background:rgba(20,18,43,.14)':'dashed rgba(20,18,43,.45);background:transparent')+';font-size:38px;color:#14122B;cursor:pointer">'+(a[i]?'✓':'')+'</button>'};
  return '<div style="background:#FFD95A;color:#14122B;border-radius:28px;padding:22px 20px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><b style="font-size:19px">Aaj ke 100% me se</b><div style="opacity:.75;margin-top:2px">'+nm+' '+n+' / 2'+(ex?' · extra '+ex:'')+'</div></div><b style="font-size:44px;line-height:1">'+p+'<small style="font-size:22px">%</small></b></div><div style="display:flex;gap:12px;margin:16px 0">'+box(0)+box(1)+'</div><b style="font-size:17px">'+(p>100?'Extra mehnat! 🔥':p>=100?'Aaj ka din poora! 🏆':p===0?'Chalo shuru karte hain!':'Bas ek aur click 💪')+'</b></div>'}
 function specCard(){var nm=specName(viewDate),a=specArr(viewDate),p=dayP(viewDate),n=specN(viewDate);
- return '<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><b style="font-size:19px">'+nm+'</b><div class="sub">'+(n===0?'Abhi shuru nahi hua':n===1?'Ek ho gaya, ek baaki':'Dono ho gaye ✓')+'</div></div><div style="background:#FF9466;color:#14122B;font-weight:700;border-radius:18px;padding:14px 18px;font-size:19px">'+p+'%</div></div><div style="display:flex;gap:10px;margin-top:12px">'+[0,1].map(function(i){return '<button data-act="spec" data-i="'+i+'" aria-label="'+nm+' '+(i+1)+'" style="flex:1;height:10px;border:0;border-radius:6px;background:'+(a[i]?'#2EB872':'rgba(140,136,168,.4)')+'"></button>'}).join('')+'</div><p class="sub" style="margin:10px 0 0">Har click = 50%. Extra lecture ya self study karo to % 100 se upar jayega.</p></div>'}
+ return '<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><b style="font-size:19px">'+nm+'</b><div class="sub">'+(n===0?'Abhi shuru nahi hua':n===1?'Ek ho gaya, ek baaki':'Dono ho gaye ✓')+'</div></div><div style="background:#FF9466;color:#14122B;font-weight:700;border-radius:18px;padding:14px 18px;font-size:19px">'+p+'%</div></div><div style="display:flex;gap:10px;margin-top:12px">'+[0,1].map(function(i){return '<button data-act="spec" data-i="'+i+'" aria-label="'+nm+' '+(i+1)+'" style="flex:1;height:10px;border:0;border-radius:6px;background:'+(a[i]?'#2EB872':'rgba(140,136,168,.4)')+'"></button>'}).join('')+'</div></div>'}
 function quickBlock(){var h='',b=behind(),nr=noReason();
  if(nr)h+='<div style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 12px">'+(nr?'<button data-act="tab" data-v="plan" style="border:0;border-radius:18px;padding:10px 14px;font-weight:700;background:#FF6B9A;color:#14122B">⚠️ '+nr+' din ka reason baaki</button>':'')+'</div>';
  S.subjects.forEach(function(s){var st=subjStats(s),nx=null;if(!st.tot)return;for(var i=0;i<s.topics.length&&!nx;i++){var t=s.topics[i],n=nextUndone(t);if(n)nx={t:t,n:n}}
@@ -689,7 +742,7 @@ function screenAaj0(){
  var h='<div class="datebar"><button class="ib" data-act="prevDay" aria-label="Pichla din">‹</button><label class="dpick"><span>'+(viewDate===td?'<small>Aaj</small>':'')+esc(fmtY(viewDate))+'</span><input type="date" data-ch="vd" value="'+viewDate+'" aria-label="Date chuno"></label><button class="ib" data-act="nextDay" aria-label="Agla din">›</button></div>';
  if(viewDate!==td)h+='<button class="btn ghost" style="margin:0 0 12px;min-height:46px" data-act="goToday">Aaj par wapas chalo</button>';
  if(hol!==undefined)h+='<div class="card" style="background:var(--pt);box-shadow:none"><b>🌴 Chhutti: '+esc(hol)+'</b><div class="sub">Is din ka target nahi ginta jaata.</div><button class="btn ghost" style="background:var(--card);min-height:46px" '+(hasHol(viewDate)?'data-act="delHol" data-d="'+viewDate+'">Chhutti hatao</button>':'data-act="tab" data-v="set">Settings me badlo</button>')+'</div>';
- if(isWE(viewDate)&&hol===undefined)h+=heroSpec()+weBlock();else{h+='<div class="hero">'+ring(p,116,12,'#fff','rgba(255,255,255,.28)',hol!==undefined&&!c?'🌴':p+'%')+'<div><div class="big">'+c+' / '+tg+' <small>'+(allTopics().some(function(x){return x.t.sc&&!x.t.merged})?'lecture + self study':'lecture')+'</small></div><p>'+msgFor(p,hol!==undefined&&!c)+'</p></div></div>';}
+ if(isWE(viewDate)&&hol===undefined)h+=heroSpec()+weBlock();else{h+='<div class="hero">'+dayRing(p,116,12,'#fff','rgba(255,255,255,.28)',hol!==undefined&&!c?'🌴':p+'%')+'<div><div class="big">'+c+' / '+tg+' <small>'+(allTopics().some(function(x){return x.t.sc&&!x.t.merged})?'lecture + self study':'lecture')+'</small></div><p>'+msgFor(p,hol!==undefined&&!c)+'</p></div></div>';}
  h+='<div class="chips"><div class="chip">🔥 Streak<b>'+st.cur+' din</b></div><div class="chip">📚 Total bacha<b>'+t.left+' / '+t.tot+'</b></div><div class="chip">📖 Self study<b>'+ssCount(viewDate)+' aaj</b></div></div>';
  if(!(isWE(viewDate)&&hol===undefined))h+=weBlock();
  h+='<div class="row2" style="margin-bottom:12px"><button class="btn pri" style="margin-top:0" data-act="pick">🎬 Lecture tick karo</button><button class="btn pri" style="margin-top:0;background:#12C2A5;color:#14122B" data-act="pickSS">📖 Self study tick karo</button></div>';
@@ -777,7 +830,7 @@ TPLK.dash={
 };
 /* ===== Launcher Grid ===== */
 TPLK.grid={
- aaj:function(){var D=kxD(),h=kxDate()+'<div class="kg-ban"><div><small>'+(D.td===viewDate?'Aaj':esc(fmt(viewDate)))+'</small><b>'+D.c+' / '+D.tg+'</b><span>'+kxLab()+'. '+D.msg+'</span></div>'+ring(D.p,92,10,'#fff','rgba(255,255,255,.3)',D.p+'%')+'</div>';
+ aaj:function(){var D=kxD(),h=kxDate()+'<div class="kg-ban"><div><small>'+(D.td===viewDate?'Aaj':esc(fmt(viewDate)))+'</small><b>'+D.c+' / '+D.tg+'</b><span>'+kxLab()+'. '+D.msg+'</span></div>'+dayRing(D.p,92,10,'#fff','rgba(255,255,255,.3)',D.p+'%')+'</div>';
   h+='<div class="kg-bd"><div><b>'+D.st.cur+'</b>din streak</div><div><b>'+D.t.left+'</b>lecture bache</div><div><b>'+D.ss+'</b>self study</div></div>';
   h+='<div class="kg-2"><button class="kg-a" data-act="pick"><i>🎬</i><span><b>Lecture</b><small>tick karo</small></span></button><button class="kg-a alt" data-act="pickSS"><i>📖</i><span><b>Self study</b><small>tick karo</small></span></button></div>';
   h+='<div class="sec">'+esc(D.ttl)+'</div><div class="kg-2">';var R=kxTicks();
@@ -795,7 +848,7 @@ TPLK.grid={
 /* ===== Neon HUD ===== */
 function knBar(p,n){n=n||10;var f=Math.round(Math.min(p,100)/100*n),s='';for(var i=0;i<n;i++)s+=i<f?'█':'░';return s}
 TPLK.neon={
- aaj:function(){var D=kxD(),h=kxDate()+'<div class="kn-ring">'+ring(D.p,176,12,'#fff','rgba(255,255,255,.14)','<div><div style="font-size:38px">'+D.c+' / '+D.tg+'</div><div style="font-size:11px;letter-spacing:2px;font-weight:500;text-transform:uppercase;margin-top:2px">'+kxLab()+'</div></div>')+'</div><div class="sub" style="text-align:center;margin:-2px 0 12px">'+D.msg+'</div>';
+ aaj:function(){var D=kxD(),h=kxDate()+'<div class="kn-ring">'+dayRing(D.p,176,12,'#fff','rgba(255,255,255,.14)','<div><div style="font-size:38px">'+D.c+' / '+D.tg+'</div><div style="font-size:11px;letter-spacing:2px;font-weight:500;text-transform:uppercase;margin-top:2px">'+kxLab()+'</div></div>')+'</div><div class="sub" style="text-align:center;margin:-2px 0 12px">'+D.msg+'</div>';
   h+='<div class="kn-kv"><div>Streak<b>'+D.st.cur+' din</b></div><div>Lecture bache<b>'+D.t.left+' / '+D.t.tot+'</b></div><div>Self study aaj<b>'+D.ss+'</b></div><div>Poora progress<b>'+knBar(pct(D.t.d,D.t.tot))+' '+pct(D.t.d,D.t.tot)+'%</b></div></div>';
   h+='<button class="kn-btn" data-act="pick">[ + Lecture tick ]</button><button class="kn-btn alt" data-act="pickSS">[ + Self study tick ]</button><div class="kn-h">// '+esc(D.ttl)+'</div>';var R=kxTicks();
   R.forEach(function(r){h+='<button class="kn-l" data-act="lec" data-k="'+r.k+'"><span>&gt;</span><b>'+esc(r.t.name)+'</b><small>'+(r.kind==='ss'?'SELF':'LEC')+' '+kxPad(r.n)+'</small><em>OK</em></button>'});
@@ -835,7 +888,7 @@ function khMonth(){var d0=parse(viewDate),y=d0.getFullYear(),m=d0.getMonth(),day
  return h+'</div></div>'}
 function khBlocks(t){var h='';for(var n=1;n<=t.total;n++){var k=t.id+':'+n,v=S.done[k],sv=S.ss&&S.ss[k];h+='<i class="'+(v&&sv?'b':v?'l':sv?'s':'')+'"></i>'}return h}
 TPLK.heat={
- aaj:function(){var D=kxD(),h=kxDate()+'<div class="kh-top"><div class="kh-ring">'+ring(D.p,84,9,'var(--p)','var(--line)',D.c+'/'+D.tg)+'</div><div><b>'+D.msg+'</b><span>🔥 '+D.st.cur+' din streak  ·  📚 '+D.t.left+' bache  ·  📖 '+D.ss+' self study</span></div></div>';
+ aaj:function(){var D=kxD(),h=kxDate()+'<div class="kh-top"><div class="kh-ring">'+dayRing(D.p,84,9,'var(--p)','var(--line)',D.c+'/'+D.tg)+'</div><div><b>'+D.msg+'</b><span>🔥 '+D.st.cur+' din streak  ·  📚 '+D.t.left+' bache  ·  📖 '+D.ss+' self study</span></div></div>';
   h+='<div class="kh-t">'+esc(fmt(viewDate).replace(/^\S+\s/,'')||'')+' ka mahina</div>'+khMonth()+'<div class="kh-lg"><span>kam</span><i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i><span>zyada</span></div>';
   h+='<div class="kh-acts"><button data-act="pick">🎬 Lecture tick</button><button class="alt" data-act="pickSS">📖 Self study tick</button></div><div class="kh-t">'+esc(D.ttl)+'</div>';var R=kxTicks();
   R.forEach(function(r){h+='<button class="kh-r" style="--c:'+r.s.color+'" data-act="lec" data-k="'+r.k+'"><i></i><b>'+esc(r.t.name)+'</b><small>'+(r.kind==='ss'?'Self study ':'Lecture ')+r.n+'</small></button>'});
@@ -952,7 +1005,7 @@ TPLK.mag={
 };
 /* ===== Glass Aurora ===== */
 TPLK.glass={
- aaj:function(){var D=kxD(),h=kxDate()+'<div class="kg2-hero">'+ring(D.p,150,12,'#fff','rgba(255,255,255,.25)',D.c+'/'+D.tg)+'<b>'+D.msg+'</b><span>'+kxLab()+'</span></div><div class="kg2-pills"><span>🔥 '+D.st.cur+' din</span><span>📚 '+D.t.left+' bache</span><span>📖 '+D.ss+' SS</span></div><div class="kg2-acts"><button data-act="pick">🎬 Lecture</button><button data-act="pickSS">📖 Self study</button></div><div class="kg2-t">'+esc(D.ttl)+'</div>';var R=kxTicks();
+ aaj:function(){var D=kxD(),h=kxDate()+'<div class="kg2-hero">'+dayRing(D.p,150,12,'#fff','rgba(255,255,255,.25)',D.c+'/'+D.tg)+'<b>'+D.msg+'</b><span>'+kxLab()+'</span></div><div class="kg2-pills"><span>🔥 '+D.st.cur+' din</span><span>📚 '+D.t.left+' bache</span><span>📖 '+D.ss+' SS</span></div><div class="kg2-acts"><button data-act="pick">🎬 Lecture</button><button data-act="pickSS">📖 Self study</button></div><div class="kg2-t">'+esc(D.ttl)+'</div>';var R=kxTicks();
   R.forEach(function(r){h+='<button class="kg2-c" data-act="lec" data-k="'+r.k+'"><i style="background:'+r.s.color+'"></i><span><b>'+esc(r.t.name)+'</b><small>'+(r.kind==='ss'?'Self study':'Lecture')+' '+r.n+'</small></span><em>✓</em></button>'});
   if(!R.length)h+='<div class="sub" style="padding:6px 4px;color:rgba(255,255,255,.8)">Abhi kuch tick nahi hua.</div>';return h+kxFoot()},
  lec:function(){var h='';S.subjects.forEach(function(s){var st=subjStats(s);h+='<button class="kg2-c big" data-act="openSubj" data-id="'+s.id+'"><span class="r">'+ring(st.p,54,6,s.color,'rgba(255,255,255,.22)',st.p+'%')+'</span><span><b>'+s.emoji+' '+esc(s.name)+'</b><small>'+st.d+' / '+st.tot+' lecture</small></span></button>'});return h+kxAddSubj()},
@@ -1185,7 +1238,7 @@ function sheetBody(){var h,k,f,v;
   h='<h2>'+esc(fmtY(pd))+'</h2><p class="sub">'+esc(nm)+(pf.h?' \u00b7 '+esc(pf.h):'')+'</p>';
   pf.ev.forEach(function(x){h+='<div class="dwtot" style="margin:8px 0"><small>'+(x.k==='fest'?'Tyohaar':'Event')+'</small><b>'+evIco(x)+' '+esc(x.n)+'</b></div>'});
   if(pd>=S.start)h+='<div class="dwtot" style="margin:10px 0"><small>\ud83d\udcda Lecture</small><b>'+pc+' / '+S.target+' ('+pp+'%)</b></div>';
-  if(pf.k==='bad'||pf.k==='half'&&pd<today())h+='<textarea class="ta" rows="2" maxlength="160" placeholder="Kyun chhoota? Reason likho" data-bind="miss:'+pd+'" aria-label="Reason">'+esc(S.missReason[pd]||'')+'</textarea>';
+  if(missedDays().indexOf(pd)>-1)h+='<textarea class="ta" rows="2" maxlength="160" placeholder="Kyun chhoota? Reason likho" data-bind="miss:'+pd+'" aria-label="Reason">'+esc(S.missReason[pd]||'')+'</textarea>';
   h+='<button class="btn pri" data-act="goDay" data-d="'+pd+'">Is date par tick karo</button>';
   h+='<button class="btn ghost" data-act="evAdd" data-d="'+pd+'">\ud83e\ude94 Event / Tyohaar jodo</button>';
   if(isWEbase(pd)){var spn=parse(pd).getDay()===6?'Pending notes':'Revision',spo=!!(S.specOff&&S.specOff[pd]);h+='<div class="dwtot" style="margin:10px 0"><small>'+spn+'</small><b>'+(spo?'OFF (normal lecture din)':'ON')+'</b></div><button class="btn ghost" data-act="specDay" data-d="'+pd+'">'+(spo?'\u2705 '+spn+' ON karo':'\u26d4 '+spn+' OFF karo')+'</button>'}
@@ -1446,6 +1499,7 @@ document.addEventListener('click',function(e){
   case 'ccopy':copyTxt(calc.expr);break;case 'ccopyA':copyTxt(calc.res);break;
   case 'cmode':calc.mode=d.v;render();break;
   case 'ck':calcKey(d.v);break;
+  case 'ctk':calcTap(+d.i);break;
   case 'cSteps':openSheet({type:'cSteps'});break;
   case 'torch':torchToggle();break;
   case 'screenLight':$('#sl').hidden=false;break;
@@ -1666,7 +1720,33 @@ function screenTpls(){var cu=(TPLX.some(function(x){return x[0]===S.tpl})?S.tpl:
  return h}
 
 /* ---------- tools: calculator, torch ---------- */
-var calc={mode:'basic',deg:true,expr:'',fin:false,res:'',ans:0,last:'',x:'',xcur:0};
+var calc={mode:'basic',deg:true,expr:'',fin:false,res:'',ans:0,last:'',x:'',xcur:0,pos:null};
+var CTK=/cosec\^|sin\^|cos\^|tan\^|cot\^|sec\^|sin⁻¹\(|cos⁻¹\(|tan⁻¹\(|sin\(|cos\(|tan\(|log\(|ln\(|abs\(|√\(|10\^\(|1÷\(|Ans|\)\/d\(|d\(|∫\(|[\s\S]/g;
+function calcToks(t){return String(t||'').match(CTK)||[]}
+function exprHTML(){var tk=calcToks(calc.expr),p=calc.pos,h='';if(!tk.length)return '0';
+ tk.forEach(function(t,i){if(p&&p.t==='caret'&&p.i===i)h+='<span class="ccar"></span>';
+  h+='<span class="tk'+(p&&p.t==='sel'&&p.i===i?' sel':'')+'" data-act="ctk" data-i="'+i+'">'+esc(t)+'</span>'});
+ if(p&&p.t==='caret'&&p.i>=tk.length)h+='<span class="ccar"></span>';
+ return h}
+function calcLive(){calc.res='';var pv=calcEval(calc.expr);if(pv!==null&&/[+−×÷^%!(]/.test(calc.expr))calc.res=pv}
+function calcTap(i){var tk=calcToks(calc.expr);
+ if(i<0||i>=tk.length){calc.pos=null;updCalc();return}
+ if(S.vibrate&&navigator.vibrate)navigator.vibrate(6);
+ if(calc.fin){calc.fin=false;calc.res=''}
+ var p=calc.pos;
+ if(p&&p.t==='sel'&&p.i===i)calc.pos={t:'caret',i:i+1};
+ else if(p&&p.t==='caret'&&p.i===i+1)calc.pos=null;
+ else calc.pos={t:'sel',i:i};
+ if(calc.pos&&calc.pos.t==='caret'&&calc.pos.i>=tk.length)calc.pos=null;
+ calcLive();updCalc()}
+function calcEdit(v){var tk=calcToks(calc.expr),p=calc.pos,pre,post;
+ if(v==='⌫'){
+  if(p.t==='sel'){pre=tk.slice(0,p.i).join('');post=tk.slice(p.i+1).join('');calc.expr=pre+post;calc.pos={t:'caret',i:p.i}}
+  else{if(p.i<=0){updCalc();return}pre=tk.slice(0,p.i-1).join('');post=tk.slice(p.i).join('');calc.expr=pre+post;calc.pos={t:'caret',i:p.i-1}}
+ }else if(p.t==='sel'){pre=tk.slice(0,p.i).join('');post=tk.slice(p.i+1).join('');calc.expr=pre+v+post;calc.pos=null}
+ else{pre=tk.slice(0,p.i).join('');post=tk.slice(p.i).join('');calc.expr=pre+v+post;calc.pos={t:'caret',i:calcToks(pre+v).length}}
+ if(calc.pos&&(calc.pos.i>=calcToks(calc.expr).length||!calc.expr))calc.pos=null;
+ calcLive();updCalc()}
 function calcEval(src){
  calc.idn=false;
  if(!/x/.test(src)){calc.xcur=0;return calcEval1(src)}
@@ -1832,11 +1912,13 @@ function calcCal(src){return /^(d\(|∫\()/.test(src)?CAL(src):null}
 
 function fmtC(v){var f=function(x){return String(+x.toPrecision(12))},a=Math.abs(v[0])<1e-12?0:v[0],b=Math.abs(v[1])<1e-12?0:v[1];
  if(!b)return f(a);var im=(Math.abs(b)===1?'':f(Math.abs(b)))+'i';if(!a)return (b<0?'−':'')+im;return f(a)+(b<0?' − ':' + ')+im}
-function updCalc(){var a=$('#cexp'),b=$('#cres'),c=$('#chis');if(a)a.textContent=calc.expr||'0';if(b)b.textContent=calc.res;if(c)c.textContent=calc.last;var e2=$('#cerr');if(e2)e2.hidden=calc.res!=='Error';var e4=$('#cstp2');if(e4)e4.hidden=!(calc.fin&&calc.res&&calc.res!=='Error');var e3=$('#cstp');if(e3)e3.hidden=!(calc.fin&&calc.res&&calc.res!=='Error')}
+function updCalc(){var a=$('#cexp'),b=$('#cres'),c=$('#chis');if(a)a.innerHTML=exprHTML();var hn=$('#chint');if(hn){hn.hidden=!calc.pos;if(calc.pos)hn.textContent=calc.pos.t==='sel'?'Chuna hua: key = badlo, ⌫ = hatao, dobara tap = wahan likho':'Yahan likh rahe ho: key = jodo, ⌫ = pichla hatao'}if(b)b.textContent=calc.res;if(c)c.textContent=calc.last;var e2=$('#cerr');if(e2)e2.hidden=calc.res!=='Error';var e4=$('#cstp2');if(e4)e4.hidden=!(calc.fin&&calc.res&&calc.res!=='Error');var e3=$('#cstp');if(e3)e3.hidden=!(calc.fin&&calc.res&&calc.res!=='Error')}
 function calcKey(v){
  var OPS=['+','−','×','÷','^','%','!','^2'];
  if(S.vibrate&&navigator.vibrate)navigator.vibrate(8);
  if(v==='DEG'){calc.deg=!calc.deg;render();return}
+ if(calc.pos&&!calc.fin&&v!=='C'&&v!=='='){calcEdit(v);return}
+ if(v==='C'||v==='=')calc.pos=null;
  if(v==='C'){calc.expr='';calc.fin=false;calc.res='';calc.last=''}
  else if(v==='⌫'){if(calc.fin){calc.expr='';calc.fin=false;calc.res=''}else calc.expr=calc.expr.replace(/(cosec\^|sin\^|cos\^|tan\^|cot\^|sec\^|sin⁻¹\(|cos⁻¹\(|tan⁻¹\(|sin\(|cos\(|tan\(|log\(|ln\(|abs\(|√\(|10\^\(|1÷\(|Ans|\)\/d\(|d\(|∫\(|.)$/,'');calc.res=''}
  else if(v==='='){var cc=calcCal(calc.expr),r=cc?cc.r:calcEval(calc.expr);if(cc){calc.why=cc.why;calc.steps=['Rule: sum, product, chain, power aur linear-argument rules lage','Calculus radian me hota hai'];if(!isNaN(+r))calc.lastV=[+r,0]}if(r===null){calc.res='Error';calc.last=calc.why}else{calc.last=calc.expr+' = '+r;calc.ansV=calc.lastV;calc.res=r;calc.fin=true}}
@@ -1845,7 +1927,7 @@ function calcKey(v){
 function screenCalc(){
  var adv=calc.mode==='adv',k=function(v,l,c){return '<button class="'+(c||'')+'" data-act="ck" data-v="'+esc(v)+'">'+esc(l||v)+'</button>'};
  var h='<div class="seg" style="margin:0 0 12px"><button class="'+(!adv?'on':'')+'" data-act="cmode" data-v="basic">Basic</button><button class="'+(adv?'on':'')+'" data-act="cmode" data-v="adv">Advanced</button></div>';
- h+='<div class="cdisp"><div class="ch" id="chis">'+esc(calc.last)+'</div><div class="ce" id="cexp">'+esc(calc.expr||'0')+'</div><div class="cr" id="cres">'+esc(calc.res)+'</div></div><div class="row2" id="cstp" style="margin-bottom:8px"'+(calc.fin&&calc.res&&calc.res!=='Error'?'':' hidden')+'><button class="btn ghost" data-act="cSteps">📝 Step-wise dekho</button></div><div class="row2" id="cstp2" style="margin-bottom:8px"'+(calc.fin&&calc.res&&calc.res!=='Error'?'':' hidden')+'><button class="btn ghost" data-act="ccopy">📋 Sawal copy</button><button class="btn ghost" data-act="ccopyA">📋 Jawab copy</button></div><div class="row2" id="cerr" style="margin-bottom:8px"'+(calc.res==='Error'?'':' hidden')+'><button class="btn ghost" data-act="cgoogle">🔎 Google par poocho</button><button class="btn ghost" data-act="ccopy">📋 Sawal copy</button></div>';
+ h+='<div class="cdisp"><div class="ch" id="chis">'+esc(calc.last)+'</div><div class="ce" id="cexp" data-act="ctk" data-i="-1">'+exprHTML()+'</div><div class="chint" id="chint"'+(calc.pos?'':' hidden')+'></div><div class="cr" id="cres">'+esc(calc.res)+'</div></div><div class="row2" id="cstp" style="margin-bottom:8px"'+(calc.fin&&calc.res&&calc.res!=='Error'?'':' hidden')+'><button class="btn ghost" data-act="cSteps">📝 Step-wise dekho</button></div><div class="row2" id="cstp2" style="margin-bottom:8px"'+(calc.fin&&calc.res&&calc.res!=='Error'?'':' hidden')+'><button class="btn ghost" data-act="ccopy">📋 Sawal copy</button><button class="btn ghost" data-act="ccopyA">📋 Jawab copy</button></div><div class="row2" id="cerr" style="margin-bottom:8px"'+(calc.res==='Error'?'':' hidden')+'><button class="btn ghost" data-act="cgoogle">🔎 Google par poocho</button><button class="btn ghost" data-act="ccopy">📋 Sawal copy</button></div>';
  if(adv)h+='<div class="rw" style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><b>x =</b><input class="inp" id="cx" style="margin:0" inputmode="decimal" placeholder="angle (khali = sab x ke liye)" value="'+esc(calc.x||'')+'" aria-label="x ki value"></div><div class="kp adv" style="margin-bottom:8px">'+k('DEG',calc.deg?'Deg':'Rad','op')+k('sin(','sin','op')+k('cos(','cos','op')+k('tan(','tan','op')+k('(','(','op')
   +k('π')+k('sin⁻¹(','sin⁻¹')+k('cos⁻¹(','cos⁻¹')+k('tan⁻¹(','tan⁻¹')+k(')',')','op')
   +k('e')+k('log(','log')+k('ln(','ln')+k('√(','√')+k('10^(','10ˣ')
@@ -2709,7 +2791,10 @@ async function npMakeNb(name,ty,cv,em){var nb={id:nid('n'),name:name,type:ty,col
  pg.thumb=await npThumb({bg:pg.bg,tpl:pg.tpl,pc:pg.pc,ts:pg.ts,items:pg.items});await ndx('pg','readwrite',function(s){return s.put(pg)});await ndx('nb','readwrite',function(s){return s.put(nb)});return nb}
 
 /* ---------- start ---------- */
-initStore().then(function(){seedIndia();applyTheme();render();setInterval(remTick,1000);remSync()});
+initStore().then(function(){seedIndia();applyTheme();render();setInterval(remTick,1000);remSync();
+ if(recovered)toast('Purana data wapas mil gaya ✓');
+ else{try{var tk=totals().d-totals().pre,lb=S.lastBackup||'';if(tk>0&&(!lb||diffDays(today(),lb)>=3))setTimeout(function(){toast('💾 Update se pehle Settings > Backup le lo')},1500)}catch(e){}}
+});
 })();
 </script>
 </body>

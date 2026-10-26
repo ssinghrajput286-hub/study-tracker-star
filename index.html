@@ -664,9 +664,24 @@ function subjStats(s){var d=0,tot=0;s.topics.forEach(function(t){d+=topicDone(t)
 function totals(){var d=0,tot=0,pre=0;allTopics().forEach(function(x){var t=x.t;tot+=t.total;for(var n=1;n<=t.total;n++){var v=S.done[t.id+':'+n];if(doneAt(v)){d++;if(v==='pre')pre++}}});return {d:d,tot:tot,pre:pre,left:tot-d}}
 function vals(){return Object.keys(S.done).map(function(k){return S.done[k]})}
 function countOn(d){return vals().filter(function(v){return v===d}).length}
-function isWE(d){var w=parse(d).getDay();return S.weekly!==false&&(w===0||w===6)&&!(S.specOff&&S.specOff[d])}
-function isWEbase(d){var w=parse(d).getDay();return S.weekly!==false&&(w===0||w===6)}
-function specName(d){return parse(d).getDay()===6?'Pending notes':'Revision'}
+/* Revision / Pending notes din: har hafte ka fixed din + kisi bhi date par apna choice (Settings me) */
+function specKind(d){if(S.weekly===false)return null;var m=S.specMap&&S.specMap[d];if(m)return m==='none'?null:m;var w=parse(d).getDay(),pn=S.pnWd==null?6:S.pnWd,rv=S.revWd==null?0:S.revWd;if(w===pn)return 'pn';if(w===rv)return 'rev';return null}
+function isWEbase(d){return specKind(d)!==null}
+function isWE(d){return isWEbase(d)&&!(S.specOff&&S.specOff[d])}
+function specName(d){return specKind(d)==='pn'?'Pending notes':'Revision'}
+function specPick(pd){var k=specKind(pd),b=function(v,l){return '<button class="'+((v==='none'?k===null:k===v)?'on':'')+'" data-act="specSet" data-d="'+pd+'" data-v="'+v+'">'+l+'</button>'};return '<div class="seg" style="margin:10px 0">'+b('pn','📝 Notes')+b('rev','🔁 Revision')+b('none','📚 Normal')+'</div>'}
+function specSet(){
+ var on=S.weekly!==false,pn=S.pnWd==null?6:S.pnWd,rv=S.revWd==null?0:S.revWd;
+ var WDo=function(sel){return '<option value="-1"'+(sel<0?' selected':'')+'>Koi nahi</option>'+WD.map(function(w,i){return '<option value="'+i+'"'+(sel===i?' selected':'')+'>'+w+'war</option>'}).join('')};
+ var h='<div class="grp">Revision aur Pending notes</div><div class="list">';
+ h+='<div class="srow"><span class="ico">🔁</span><span class="tx"><b>Revision / Pending notes din</b><small>Band karoge to saare din normal lecture din ho jayenge</small></span><button class="swt" role="switch" aria-checked="'+on+'" aria-label="Revision aur Pending notes on off" data-act="specMaster"></button></div>';
+ if(on){
+  h+='<label class="srow"><span class="ico">📝</span><span class="tx"><b>Pending notes ka din</b><small>Har hafte is din</small></span><select class="sel" data-ch="pnwd" aria-label="Pending notes ka din">'+WDo(pn)+'</select></label>';
+  h+='<label class="srow"><span class="ico">🔁</span><span class="tx"><b>Revision ka din</b><small>Har hafte is din</small></span><select class="sel" data-ch="revwd" aria-label="Revision ka din">'+WDo(rv)+'</select></label>';
+  h+='<div class="srow col"><span class="ico">📅</span><span class="tx"><b>Kisi bhi date par</b><small>Date aur type chuno. Calendar me apne aap dikhega</small></span><div class="ctl" style="display:flex;gap:8px;flex-wrap:wrap"><input class="sel" type="date" id="spD" value="'+today()+'" aria-label="Date"><select class="sel" id="spT" aria-label="Din ka type"><option value="pn">Pending notes</option><option value="rev">Revision</option><option value="none">Normal lecture din</option></select><button class="btn" data-act="specAdd">Lagao</button></div></div>';
+  Object.keys(S.specMap||{}).sort().forEach(function(d){var m=S.specMap[d];h+='<div class="srow"><span class="ico">'+(m==='pn'?'📝':m==='rev'?'🔁':'📚')+'</span><span class="tx"><b>'+esc(fmtY(d))+'</b><small>'+(m==='pn'?'Pending notes':m==='rev'?'Revision':'Normal lecture din')+'</small></span><button class="btn ghost" data-act="specDel" data-d="'+d+'" aria-label="Hatao">✕</button></div>'});
+ }
+ return h+'</div>'}
 function specArr(d){var a=S.spec&&S.spec[d];return a?a:[0,0]}
 function specN(d){var a=specArr(d);return (a[0]?1:0)+(a[1]?1:0)}
 function ssOnly(d){S.ss=S.ss||{};return Object.keys(S.ss).filter(function(k){return S.ss[k]===d&&!isAuto(k)}).length}
@@ -1066,7 +1081,7 @@ function pcInfo0(d){var td=today(),c=dayC(d),hol=holName(d),isH=isHol(d);
  if(dayMet(d))return {k:'ok',e:'\u2705'};
  if(c>0)return {k:'half',e:'\ud83c\udf17'};
  if(d<td&&leftAtStart(d)>0)return {k:'bad',e:'\ud83d\udc94'};
- return {k:d>td?'fut':'',e:''}}
+ var sk=(isWE(d)&&!isH)?specKind(d):null;return {k:d>td?'fut':'',e:sk==='pn'?'📝':sk==='rev'?'🔁':''}}
 function pcCal(){var td=today();if(!pmon)pmon=td.slice(0,7);
  var y=+pmon.slice(0,4),m=+pmon.slice(5,7)-1,days=new Date(y,m+1,0).getDate(),off=new Date(y,m,1).getDay(),i,ds,f,
  h='<div class="pc-h"><button data-act="pmPrev" aria-label="Pichla mahina">\u2039</button><b>'+PMN[m]+' '+y+'</b><button data-act="pmNext" aria-label="Agla mahina">\u203a</button></div><div class="pc-wd">'+['Rav','Som','Man','Bud','Gur','Shu','San'].map(function(x){return '<span>'+x+'</span>'}).join('')+'</div><div class="pc-g">';
@@ -1177,7 +1192,7 @@ function screenSet(){
  Object.keys(THEMES).forEach(function(k){h+='<button style="--c:'+THEMES[k][1]+'" class="'+(S.theme===k?'on':'')+'" data-act="theme" data-v="'+k+'" aria-label="'+THEMES[k][0]+'">'+(S.theme===k?'✓':'')+'</button>'});
  h+='</div></div></div><div class="srow col"><span class="ico">🌗</span><span class="tx"><b>Light ya Dark</b><small>Phone jaisa rakhoge to apne aap badlega</small></span><div class="ctl"><div class="seg">';
  [['auto','Phone jaisa'],['light','Light'],['dark','Dark']].forEach(function(m){h+='<button class="'+(S.mode===m[0]?'on':'')+'" data-act="mode" data-v="'+m[0]+'">'+m[1]+'</button>'});
- h+='</div></div></div>'+nrow('openTpls','🎨','Template','Abhi: '+((TPLX.filter(function(x){return x[0]===(S.tpl||'bold')})[0]||[])[1]||'')+'. App ka design badlo, data wahi rahega')+'</div><div class="grp">Shabaashi aur feel</div><div class="list">';
+ h+='</div></div></div>'+nrow('openTpls','🎨','Template','Abhi: '+((TPLX.filter(function(x){return x[0]===(S.tpl||'bold')})[0]||[])[1]||'')+'. App ka design badlo, data wahi rahega')+'</div>'+specSet()+'<div class="grp">Shabaashi aur feel</div><div class="list">';
  h+=tgl('confetti','🎉','Confetti','Target poora hone par');
  h+=tgl('cele','🏆','Shabaashi message','Target poora hone par popup');
  h+=tgl('vibrate','📳','Tick par vibration','Lecture tick karte waqt halka jhatka');
@@ -1241,7 +1256,8 @@ function sheetBody(){var h,k,f,v;
   if(missedDays().indexOf(pd)>-1)h+='<textarea class="ta" rows="2" maxlength="160" placeholder="Kyun chhoota? Reason likho" data-bind="miss:'+pd+'" aria-label="Reason">'+esc(S.missReason[pd]||'')+'</textarea>';
   h+='<button class="btn pri" data-act="goDay" data-d="'+pd+'">Is date par tick karo</button>';
   h+='<button class="btn ghost" data-act="evAdd" data-d="'+pd+'">\ud83e\ude94 Event / Tyohaar jodo</button>';
-  if(isWEbase(pd)){var spn=parse(pd).getDay()===6?'Pending notes':'Revision',spo=!!(S.specOff&&S.specOff[pd]);h+='<div class="dwtot" style="margin:10px 0"><small>'+spn+'</small><b>'+(spo?'OFF (normal lecture din)':'ON')+'</b></div><button class="btn ghost" data-act="specDay" data-d="'+pd+'">'+(spo?'\u2705 '+spn+' ON karo':'\u26d4 '+spn+' OFF karo')+'</button>'}
+  h+=specPick(pd);
+  if(isWEbase(pd)){var spn=specName(pd),spo=!!(S.specOff&&S.specOff[pd]);h+='<div class="dwtot" style="margin:10px 0"><small>'+spn+'</small><b>'+(spo?'OFF (normal lecture din)':'ON')+'</b></div><button class="btn ghost" data-act="specDay" data-d="'+pd+'">'+(spo?'\u2705 '+spn+' ON karo':'\u26d4 '+spn+' OFF karo')+'</button>'}
   h+=hasHol(pd)?'<button class="btn ghost" data-act="pDelHol" data-d="'+pd+'">\ud83c\udfd6\ufe0f Chhutti hatao</button>':'<button class="btn ghost" data-act="addHol" data-d="'+pd+'">\ud83c\udfd6\ufe0f Chhutti lo</button>';
   return h+'<button class="btn txt" data-act="closeSheet">Band karo</button>'}
  if(sheet.type==='evadd'){
@@ -1304,6 +1320,10 @@ document.addEventListener('click',function(e){
  var el=e.target.closest('[data-act]');if(!el)return;
  var a=el.dataset.act,d=el.dataset;
  switch(a){
+  case 'specMaster':mutate(function(){S.weekly=S.weekly===false?true:false},null);break;
+  case 'specAdd':{var dv=($('#spD')||{}).value,tv=($('#spT')||{}).value||'pn';if(!dv){toast('Date chuno');break}mutate(function(){S.specMap=S.specMap||{};S.specMap[dv]=tv},null);break}
+  case 'specDel':{var dd=d.d;mutate(function(){if(S.specMap)delete S.specMap[dd]},null);break}
+  case 'specSet':{var d2=d.d,v2=d.v;mutate(function(){S.specMap=S.specMap||{};S.specMap[d2]=v2},null);break}
   case 'specDay':{var sd=d.d;mutate(function(){S.specOff=S.specOff||{};if(S.specOff[sd])delete S.specOff[sd];else S.specOff[sd]=1},null);break}
   case 'tab':nav.tab=d.v;nav.stack=[];resetScroll=true;render();break;
   case 'back':{var cc=cur();if(cc&&cc.t==='doubt'&&ed&&ed.dirty){confirmSheet('Edit save nahi kiya. Bina save kiye peeche jao?','Haan, chhodo',function(){ed=null;nav.stack.pop();resetScroll=true;render()});break}nav.stack.pop();resetScroll=true;render();break}
@@ -1518,7 +1538,7 @@ document.addEventListener('click',function(e){
   case 'dwList':closeSheet();go({t:'dwlist'});break;
   case 'repAll':{var bA;try{bA=makePDF(allRows(),{footer:true})}catch(e){toast('PDF nahi ban paya');break}closeSheet();shareBlob(bA,'din-wise-report-'+today()+'.pdf','application/pdf','Din-wise Report');break}
   case 'repOne':{var rd=$('#rDate'),dd1=rd&&rd.value;if(!dd1){toast('Date chuno');break}var oldV=viewDate,bO;try{viewDate=dd1;bO=makePDF(reportRows())}catch(e){viewDate=oldV;toast('PDF nahi ban paya');break}viewDate=oldV;closeSheet();shareBlob(bO,'study-report-'+dd1+'.pdf','application/pdf','Study Tracker Report');break}
-  case 'resetAll':confirmSheet('Saare subject ke chapter, tick aur note hat jayenge. Settings aur chhuttiyan bachi rahengi.','Haan, saaf karo',function(){mutate(function(){var nd=defaultState();['theme','mode','target','start','weekOff','cele','confetti','vibrate','holidays'].forEach(function(k){nd[k]=S[k]});S=nd},'Sab saaf ho gaya')});break;
+  case 'resetAll':confirmSheet('Saare subject ke chapter, tick aur note hat jayenge. Settings aur chhuttiyan bachi rahengi.','Haan, saaf karo',function(){mutate(function(){var nd=defaultState();['theme','mode','target','start','weekOff','cele','confetti','vibrate','holidays','weekly','pnWd','revWd','specMap'].forEach(function(k){nd[k]=S[k]});S=nd},'Sab saaf ho gaya')});break;
   case 'closeSheet':closeSheet();break;
   case 'celeClose':$('#cele').hidden=true;break;
  }
@@ -1527,7 +1547,8 @@ document.addEventListener('change',function(e){var t=e.target;if(!t.dataset)retu
  if(t.dataset.ch==='vd'&&t.value){viewDate=t.value;render()}
  else if(t.dataset.ch==='start'&&t.value){mutate(function(){S.start=t.value})}
  else if(t.dataset.ch==='tOff'||t.dataset.ch==='tOn'){var tk=t.dataset.ch==='tOff'?'torchOff':'torchOn',tv=t.value.trim()||defaultState()[tk];mutate(function(){S[tk]=tv})}
- else if(t.dataset.ch==='weekoff'){var wv=parseInt(t.value,10);mutate(function(){S.weekOff=wv})}});
+ else if(t.dataset.ch==='pnwd'||t.dataset.ch==='revwd'){var wv2=parseInt(t.value,10),wk=t.dataset.ch==='pnwd'?'pnWd':'revWd';mutate(function(){S[wk]=wv2})}
+  else if(t.dataset.ch==='weekoff'){var wv=parseInt(t.value,10);mutate(function(){S.weekOff=wv})}});
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.closest&&t.closest('#sheetWrap')&&(t.tagName==='TEXTAREA'||(t.tagName==='INPUT'&&/^(text|search|number)$/.test(t.type)))){if(document.activeElement!==t)t.focus();try{if(window.AndroidBridge&&AndroidBridge.showKeyboard)AndroidBridge.showKeyboard()}catch(x){}}},true);
 document.addEventListener('touchend',function(e){var t=e.target;if(t&&t.closest&&t.closest('#sheetWrap')&&(t.tagName==='TEXTAREA'||(t.tagName==='INPUT'&&/^(text|search|number)$/.test(t.type)))&&document.activeElement!==t)t.focus()},true);
 document.addEventListener('focusin',function(e){if(e.target.dataset&&e.target.dataset.bind){snapPending=JSON.stringify(S);snapUsed=false}});
@@ -1720,8 +1741,8 @@ function screenTpls(){var cu=(TPLX.some(function(x){return x[0]===S.tpl})?S.tpl:
  return h}
 
 /* ---------- tools: calculator, torch ---------- */
-var calc={mode:'basic',deg:true,expr:'',fin:false,res:'',ans:0,last:'',x:'',xcur:0,pos:null};
-var CTK=/cosec\^|sin\^|cos\^|tan\^|cot\^|sec\^|sin⁻¹\(|cos⁻¹\(|tan⁻¹\(|sin\(|cos\(|tan\(|log\(|ln\(|abs\(|√\(|10\^\(|1÷\(|Ans|\)\/d\(|d\(|∫\(|[\s\S]/g;
+var calc={mode:'basic',deg:true,expr:'',fin:false,res:'',ans:0,last:'',x:'',th:'',ph:'',xcur:0,vcur:{},pos:null};
+var CTK=/cosec\^|sin\^|cos\^|tan\^|cot\^|sec\^|sin⁻¹\(|cos⁻¹\(|tan⁻¹\(|sin\(|cos\(|tan\(|log\(|ln\(|abs\(|√\(|10\^\(|e\^\(|1÷\(|Ans|\)\/d\(|d\(|∫\(|[\s\S]/g;
 function calcToks(t){return String(t||'').match(CTK)||[]}
 function exprHTML(){var tk=calcToks(calc.expr),p=calc.pos,h='';if(!tk.length)return '0';
  tk.forEach(function(t,i){if(p&&p.t==='caret'&&p.i===i)h+='<span class="ccar"></span>';
@@ -1747,21 +1768,24 @@ function calcEdit(v){var tk=calcToks(calc.expr),p=calc.pos,pre,post;
  else{pre=tk.slice(0,p.i).join('');post=tk.slice(p.i).join('');calc.expr=pre+v+post;calc.pos={t:'caret',i:calcToks(pre+v).length}}
  if(calc.pos&&(calc.pos.i>=calcToks(calc.expr).length||!calc.expr))calc.pos=null;
  calcLive();updCalc()}
+function varNote(){var o='';[['x',calc.x],['θ',calc.th],['φ',calc.ph]].forEach(function(r){if(calc.expr.indexOf(r[0])>-1&&String(r[1]||'').trim()!=='')o+='<br>'+r[0]+' = '+esc(String(r[1]))+(calc.deg?'°':'')});return o}
 function calcEval(src){
- calc.idn=false;
- if(!/x/.test(src)){calc.xcur=0;return calcEval1(src)}
- var xs=String(calc.x||'').trim().replace('−','-'),xn=xs===''?NaN:Number(xs);
- if(isFinite(xn)){calc.xcur=xn;return calcEval1(src)}
+ calc.idn=false;calc.vcur={};
+ var VS=['x','θ','φ'].filter(function(v){return src.indexOf(v)>-1});
+ if(!VS.length){calc.xcur=0;return calcEval1(src)}
+ var raw={'x':calc.x,'θ':calc.th,'φ':calc.ph},fixed={},free=[];
+ VS.forEach(function(v){var t=String(raw[v]||'').trim().replace('−','-'),n=t===''?NaN:Number(t);if(isFinite(n))fixed[v]=n;else free.push(v)});
+ if(!free.length){VS.forEach(function(v){calc.vcur[v]=fixed[v]});calc.xcur=calc.vcur.x||0;return calcEval1(src)}
  var smp=calc.deg?[13,27,41,67,123]:[.3,.7,1.1,1.9,2.6],vs=[],i;
- for(i=0;i<smp.length;i++){calc.xcur=smp[i];if(calcEval1(src)===null){calc.why='x ki value likho (x = box me), ya expression sahi karo';return null}vs.push(calc.lastV)}
- for(i=1;i<vs.length;i++){if(Math.abs(vs[i][0]-vs[0][0])>1e-9*Math.max(1,Math.abs(vs[0][0]))||Math.abs(vs[i][1]-vs[0][1])>1e-9){calc.why='Ye x par depend karta hai, upar x = box me angle likho';return null}}
+ for(i=0;i<smp.length;i++){VS.forEach(function(v){var fi=free.indexOf(v);calc.vcur[v]=fi<0?fixed[v]:smp[(i+fi*2)%smp.length]});calc.xcur=calc.vcur.x||0;if(calcEval1(src)===null){calc.why='Variable ki value likho (x, θ, φ box me), ya expression sahi karo';return null}vs.push(calc.lastV)}
+ for(i=1;i<vs.length;i++){if(Math.abs(vs[i][0]-vs[0][0])>1e-9*Math.max(1,Math.abs(vs[0][0]))||Math.abs(vs[i][1]-vs[0][1])>1e-9){calc.why='Ye variable par depend karta hai, upar x / θ / φ box me angle likho';return null}}
  calc.lastV=vs[0];calc.steps=null;calc.idn=true;return fmtC(vs[0])}
 function calcEval1(src){
  calc.why='Expression adhura ya galat hai';
  var s=src.replace(/\*/g,'×').replace(/\//g,'÷').replace(/-/g,'−').replace(/\s/g,''),i=0,o=0,q,PI=Math.PI;
  for(q=0;q<s.length;q++){if(s[q]==='(')o++;else if(s[q]===')')o--}
  if(o<0)return null;while(o-->0)s+=')';
- var NAME=/^(sin⁻¹|cos⁻¹|tan⁻¹|cosec|sin|cos|tan|cot|sec|log|ln|abs|√|π|e|x|Ans)/,deg=calc.deg;
+ var NAME=/^(sin⁻¹|cos⁻¹|tan⁻¹|cosec|sin|cos|tan|cot|sec|log|ln|abs|√|π|e|x|θ|φ|Ans)/,deg=calc.deg;
  var R=function(x){return deg?x*PI/180:x},D=function(x){return deg?x*180/PI:x},Z=function(v){return Math.abs(v)<1e-14?0:v};
  var re=function(x){return [x,0]},isR=function(v){return Math.abs(v[1])<1e-14},F=function(m){throw m};
  var need=function(a){if(!isR(a))F('Complex number ka sin, cos, tan abhi nahi chalta');return a[0]};
@@ -1783,6 +1807,7 @@ function calcEval1(src){
   log:function(a){var l=ln(a);return [l[0]/Math.LN10,l[1]/Math.LN10]},ln:ln,
   abs:function(a){return re(Math.hypot(a[0],a[1]))},
   '√':function(a){var r=Math.hypot(a[0],a[1]);return [Math.sqrt(Math.max(0,(r+a[0])/2)),(a[1]<0?-1:1)*Math.sqrt(Math.max(0,(r-a[0])/2))]}};
+ function ch(){var v=po();while(i<s.length&&/^(x|θ|φ|π)/.test(s.slice(i)))v=mul(v,po());return v}
  function sp(){var r=s.slice(i);return /^[0-9.(]/.test(r)||NAME.test(r)}
  function ex(){var v=tm();while(s[i]==='+'||s[i]==='−'){var c=s[i++],t=tm(),p0=v;v=c==='+'?add(v,t):sub(v,t);St(p0,c,t,v)}return v}
  function tm(){var v=un();for(;;){var p1=v,u1;if(s[i]==='×'){i++;u1=un();v=mul(v,u1);St(p1,'×',u1,v)}else if(s[i]==='÷'){i++;u1=un();v=dv(v,u1);St(p1,'÷',u1,v)}else if(i<s.length&&sp()){u1=un();v=mul(v,u1);St(p1,'×',u1,v)}else break}return v}
@@ -1794,9 +1819,9 @@ function calcEval1(src){
   if(s[i]==='('){i++;var v=ex();if(s[i]!==')')throw 0;i++;return v}
   if((m=r.match(/^(\d+\.?\d*|\.\d+)/))){i+=m[0].length;return re(parseFloat(m[0]))}
   if((m=r.match(NAME))){var n=m[0];i+=n.length;
-   if(n==='x')return re(calc.xcur||0);if(n==='π')return re(PI);if(n==='e')return re(Math.E);if(n==='Ans')return calc.ansV||re(0);
+   if(n==='x'||n==='θ'||n==='φ')return re((calc.vcur&&calc.vcur[n])||0);if(n==='π')return re(PI);if(n==='e')return re(Math.E);if(n==='Ans')return calc.ansV||re(0);
    var pw=null,pm;if(/^(sin|cos|tan|cot|sec|cosec)$/.test(n)&&(pm=s.slice(i).match(/^\^([−+]?\d+)/))){pw=parseInt(pm[1].replace('−','-'),10);i+=pm[0].length}
-   var a;if(s[i]==='('){i++;a=ex();if(s[i]!==')')throw 0;i++}else a=po();var fv=FN[n](a);Su(n+'('+fmtC(a)+(deg&&/^(sin|cos|tan|cot|sec|cosec)$/.test(n)?'°':'')+') = '+fmtC(fv));if(pw===null)return fv;var fp=cpow(fv,re(pw));St(fv,'^',re(pw),fp);return fp}
+   var a;if(s[i]==='('){i++;a=ex();if(s[i]!==')')throw 0;i++}else a=ch();var fv=FN[n](a);Su(n+'('+fmtC(a)+(deg&&/^(sin|cos|tan|cot|sec|cosec)$/.test(n)?'°':'')+') = '+fmtC(fv));if(pw===null)return fv;var fp=cpow(fv,re(pw));St(fv,'^',re(pw),fp);return fp}
   throw 0}
  try{var v=ex();if(i<s.length)return null;
   if(!isFinite(v[0])||!isFinite(v[1])){calc.why='Jawab bahut bada hai';return null}
@@ -1811,7 +1836,7 @@ dvd=function(a,b){return isN(a,0)?N(0):isN(b,1)?a:['/',a,b]},
 pw=function(a,b){return isN(b,1)?a:isN(b,0)?N(1):['^',a,b]},
 fn=function(f,a){return ['f',f,a]};
 function parse(src){
- var s=src.replace(/−/g,'-').replace(/×/g,'*').replace(/÷/g,'/').replace(/\s/g,''),i=0,NM=/^(sin⁻¹|cos⁻¹|tan⁻¹|cosec|sin|cos|tan|cot|sec|log|ln|abs|√|π|θ|[xtavphe])/;
+ var s=src.replace(/−/g,'-').replace(/×/g,'*').replace(/÷/g,'/').replace(/\s/g,''),i=0,NM=/^(sin⁻¹|cos⁻¹|tan⁻¹|cosec|sin|cos|tan|cot|sec|log|ln|abs|√|π|θ|φ|[xtavphe])/;
  var o=0,q;for(q=0;q<s.length;q++){if(s[q]==='(')o++;else if(s[q]===')')o--}while(o-->0)s+=')';
  function ex(){var v=tm();while(s[i]==='+'||s[i]==='-'){var c=s[i++],t=tm();v=c==='+'?add(v,t):add(v,neg(t))}return v}
  function tm(){var v=un();for(;;){if(s[i]==='*'){i++;v=mul(v,un())}else if(s[i]==='/'){i++;v=dvd(v,un())}else if(i<s.length&&/^[0-9.(]/.test(s.slice(i))||NM.test(s.slice(i)))v=mul(v,un());else break}return v}
@@ -1897,8 +1922,10 @@ function split(s){var o=0,r=[],c='',q;for(q=0;q<s.length;q++){var ch=s[q];if(ch=
 return function(src){var m,E={};
  try{
   if((m=src.match(/^d\((.*)\)\/d\(([xtavphθ])\)?$/))){var r=P(D(parse(m[1]),m[2]),0);return {r:'d/d'+m[2]+' = '+r,why:''}}
-  if(src.indexOf('∫(')===0){var body=src.slice(2).replace(/\)$/,''),p=split(body);
-   if(p.length!==2&&p.length!==4)return {r:'∫ form: ∫(function , variable) ya ∫(function , variable , neeche , upar)',why:''};
+  if(src.indexOf('∫(')===0){var o2=0,q2;for(q2=0;q2<src.length;q2++){if(src[q2]==='(')o2++;else if(src[q2]===')')o2--}while(o2-->0)src+=')';
+   var body=src.slice(2).replace(/\)$/,''),p=split(body);
+   if(p.length===1&&(m=body.match(/^(.+?)[×*]?d\(([xtavphθ])\)$/)))p=[m[1],m[2]];
+   if(p.length!==2&&p.length!==4)return {r:'∫ form: ∫(function × d(x)) ya ∫(function , variable) ya ∫(function , variable , neeche , upar)',why:''};
    var f=parse(p[0]),x=p[1].trim();
    if(!/^[xtavphθ]$/.test(x))return {r:'variable x, t, a, v, p, h ya θ chuno',why:''};
    var F=I(f,x);
@@ -1920,7 +1947,7 @@ function calcKey(v){
  if(calc.pos&&!calc.fin&&v!=='C'&&v!=='='){calcEdit(v);return}
  if(v==='C'||v==='=')calc.pos=null;
  if(v==='C'){calc.expr='';calc.fin=false;calc.res='';calc.last=''}
- else if(v==='⌫'){if(calc.fin){calc.expr='';calc.fin=false;calc.res=''}else calc.expr=calc.expr.replace(/(cosec\^|sin\^|cos\^|tan\^|cot\^|sec\^|sin⁻¹\(|cos⁻¹\(|tan⁻¹\(|sin\(|cos\(|tan\(|log\(|ln\(|abs\(|√\(|10\^\(|1÷\(|Ans|\)\/d\(|d\(|∫\(|.)$/,'');calc.res=''}
+ else if(v==='⌫'){if(calc.fin){calc.expr='';calc.fin=false;calc.res=''}else calc.expr=calcToks(calc.expr).slice(0,-1).join('');calc.res=''}
  else if(v==='='){var cc=calcCal(calc.expr),r=cc?cc.r:calcEval(calc.expr);if(cc){calc.why=cc.why;calc.steps=['Rule: sum, product, chain, power aur linear-argument rules lage','Calculus radian me hota hai'];if(!isNaN(+r))calc.lastV=[+r,0]}if(r===null){calc.res='Error';calc.last=calc.why}else{calc.last=calc.expr+' = '+r;calc.ansV=calc.lastV;calc.res=r;calc.fin=true}}
  else{if(calc.fin){calc.expr=OPS.indexOf(v)>-1?'Ans':'';calc.fin=false}calc.expr+=v;calc.res='';var pv=calcEval(calc.expr);if(pv!==null&&/[+−×÷^%!(]/.test(calc.expr))calc.res=pv}
  updCalc()}
@@ -1928,10 +1955,10 @@ function screenCalc(){
  var adv=calc.mode==='adv',k=function(v,l,c){return '<button class="'+(c||'')+'" data-act="ck" data-v="'+esc(v)+'">'+esc(l||v)+'</button>'};
  var h='<div class="seg" style="margin:0 0 12px"><button class="'+(!adv?'on':'')+'" data-act="cmode" data-v="basic">Basic</button><button class="'+(adv?'on':'')+'" data-act="cmode" data-v="adv">Advanced</button></div>';
  h+='<div class="cdisp"><div class="ch" id="chis">'+esc(calc.last)+'</div><div class="ce" id="cexp" data-act="ctk" data-i="-1">'+exprHTML()+'</div><div class="chint" id="chint"'+(calc.pos?'':' hidden')+'></div><div class="cr" id="cres">'+esc(calc.res)+'</div></div><div class="row2" id="cstp" style="margin-bottom:8px"'+(calc.fin&&calc.res&&calc.res!=='Error'?'':' hidden')+'><button class="btn ghost" data-act="cSteps">📝 Step-wise dekho</button></div><div class="row2" id="cstp2" style="margin-bottom:8px"'+(calc.fin&&calc.res&&calc.res!=='Error'?'':' hidden')+'><button class="btn ghost" data-act="ccopy">📋 Sawal copy</button><button class="btn ghost" data-act="ccopyA">📋 Jawab copy</button></div><div class="row2" id="cerr" style="margin-bottom:8px"'+(calc.res==='Error'?'':' hidden')+'><button class="btn ghost" data-act="cgoogle">🔎 Google par poocho</button><button class="btn ghost" data-act="ccopy">📋 Sawal copy</button></div>';
- if(adv)h+='<div class="rw" style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><b>x =</b><input class="inp" id="cx" style="margin:0" inputmode="decimal" placeholder="angle (khali = sab x ke liye)" value="'+esc(calc.x||'')+'" aria-label="x ki value"></div><div class="kp adv" style="margin-bottom:8px">'+k('DEG',calc.deg?'Deg':'Rad','op')+k('sin(','sin','op')+k('cos(','cos','op')+k('tan(','tan','op')+k('(','(','op')
+ if(adv)h+='<div class="rw" style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><b>x</b><input class="inp" id="cx" style="margin:0;min-width:0" inputmode="decimal" placeholder="x" value="'+esc(calc.x||'')+'" aria-label="x ki value"><b>θ</b><input class="inp" id="cth" style="margin:0;min-width:0" inputmode="decimal" placeholder="θ" value="'+esc(calc.th||'')+'" aria-label="theta ki value"><b>φ</b><input class="inp" id="cph" style="margin:0;min-width:0" inputmode="decimal" placeholder="φ" value="'+esc(calc.ph||'')+'" aria-label="phi ki value"></div><div class="kp adv" style="margin-bottom:8px">'+k('DEG',calc.deg?'Deg':'Rad','op')+k('sin(','sin','op')+k('cos(','cos','op')+k('tan(','tan','op')+k('(','(','op')
   +k('π')+k('sin⁻¹(','sin⁻¹')+k('cos⁻¹(','cos⁻¹')+k('tan⁻¹(','tan⁻¹')+k(')',')','op')
   +k('e')+k('log(','log')+k('ln(','ln')+k('√(','√')+k('10^(','10ˣ')
-  +k('^','xʸ')+k('^2','x²')+k('!','n!')+k('1÷(','1/x')+k('abs(','|x|')+'</div><div class="kp adv" style="margin-bottom:8px;grid-template-columns:repeat(5,1fr)">'+k('d(','d(a)','op')+k(')/d(','/d(b)','op')+k('∫(','∫','op')+k(',',',','op')+k('θ')+k('t')+k('a')+k('v')+k('p')+k('h')+'</div><p class="sub" style="margin:0 2px 8px">Derivative: d(a) dabao, function likho, phir /d(b) dabao, variable likho (x, t, a, v, p, h, θ), = dabao. Integral: ∫( function , variable ) ya ∫( function , variable , neeche , upar ), jaise ∫(a*t,t,0,h). Jawab variables me aata hai. Radian me chalta hai.</p>'
+  +k('^','xʸ')+k('^2','x²')+k('!','n!')+k('1÷(','1/x')+k('abs(','|x|')+'</div><div class="kp adv" style="margin-bottom:8px;grid-template-columns:repeat(5,1fr)">'+k('d(','d(a)','op')+k(')/d(','/d(b)','op')+k('∫(','∫','op')+k(',',',','op')+k('θ')+k('t')+k('a')+k('v')+k('p')+k('h')+k('φ')+k('e^(','eˣ','op')+'<button style="grid-column:span 3" data-act="ck" data-v="x">x</button></div><p class="sub" style="margin:0 2px 8px">Derivative: d(a) dabao, function likho, phir /d(b) dabao, variable likho (x, t, a, v, p, h, θ), = dabao. Integral: seedha ∫( function × d(x) ), jaise ∫(e^x × d(x)). Ya ∫( function , variable ) ya ∫( function , variable , neeche , upar ), jaise ∫(a*t,t,0,h). Jawab variables me aata hai. Radian me chalta hai.</p>'
   +'<p class="sub" style="margin:0 2px 6px">sinⁿ: pehle sin^ dabao, phir n (poora number, jaise 2 ya −3) likho, phir ( aur angle.</p><div class="kp adv" style="margin-bottom:8px;grid-template-columns:repeat(4,1fr)">'+k('sin^','sin^n')+k('cos^','cos^n')+k('tan^','tan^n')+k('cot^','cot^n')+k('sec^','sec^n')+k('cosec^','cosec^n')+'<button style="grid-column:span 2" data-act="ck" data-v="x">x</button></div>';
  h+='<div class="kp">'+k('C','C','cl')+k('⌫','⌫','op')+k('%','%','op')+k('÷','÷','op')+k('7')+k('8')+k('9')+k('×','×','op')+k('4')+k('5')+k('6')+k('−','−','op')+k('1')+k('2')+k('3')+k('+','+','op')+k('0')+k('.')+k('Ans')+k('=','=','eq')+'</div>';
  return h}
@@ -2752,7 +2779,7 @@ document.addEventListener('change',function(e){var t=e.target;
  else if(t.id==='npImp'){var g=t.files&&t.files[0];t.value='';if(g)npImportAny(g)}
  else if(t.id==='bkImp'){var bf=t.files&&t.files[0];t.value='';if(bf)bkRead(bf)}
  else if((t.id==='npCC'||t.id==='npHex')&&ne){var hv=t.value.trim();if(hv[0]!=='#')hv='#'+hv;if(!/^#[0-9a-f]{6}$/i.test(hv)){if(t.id==='npHex')toast('Hex galat hai (jaise #FF8800)');return}npApplyCol(hv)}});
-document.addEventListener('input',function(e){var t=e.target;if(t.id==='cx'){calc.x=t.value;if(calc.expr){var pv=calcEval(calc.expr);if(calc.fin){if(pv===null){calc.res='Error';calc.last=calc.why}else{calc.last=calc.expr+' = '+pv;calc.res=pv}}else calc.res=pv!==null?pv:'';updCalc()}return}if(t.id==='npSz'&&ne){ne.szs[ne.pen]=+t.value;var v=$('#npSzV');if(v)v.textContent=t.value}});
+document.addEventListener('input',function(e){var t=e.target;if(t.id==='cx'||t.id==='cth'||t.id==='cph'){if(t.id==='cx')calc.x=t.value;else if(t.id==='cth')calc.th=t.value;else calc.ph=t.value;if(calc.expr){var pv=calcEval(calc.expr);if(calc.fin){if(pv===null){calc.res='Error';calc.last=calc.why}else{calc.last=calc.expr+' = '+pv;calc.res=pv}}else calc.res=pv!==null?pv:'';updCalc()}return}if(t.id==='npSz'&&ne){ne.szs[ne.pen]=+t.value;var v=$('#npSzV');if(v)v.textContent=t.value}});
 
 function npEmRow(){var r='<p class="sub" style="margin-top:12px">Emoji</p><div class="dtools">';NEMO.forEach(function(e){r+='<button class="dt'+(sheet.em===e?' on':'')+'" data-act="npEm" data-v="'+e+'">'+e+'</button>'});return r+'</div>'}
 function npSheet(){var h,k;var t=sheet.type;
@@ -2777,7 +2804,7 @@ function npSheet(){var h,k;var t=sheet.type;
  if(t==='npPage'){h='<h2>Page</h2><p class="sub">Background</p><div class="npTypes">';[['plain','⬜ Saada'],['lined','☰ Lakeer'],['grid','▦ Grid'],['dots','⁞ Dots'],['diary','📔 Diary']].forEach(function(b){h+='<button class="dt wide'+(ne.bg===b[0]?' on':'')+'" data-act="npBgSet" data-v="'+b[0]+'">'+b[1]+'</button>'});
   h+='</div><p class="sub" style="margin-top:12px">Kaagaz ka rang</p><div class="npTypes">';PCOLS.forEach(function(b){h+='<button class="dt wide'+((ne.pc||PCOLS[0][0])===b[0]?' on':'')+'" data-act="npPcSet" data-v="'+b[0]+'">'+b[1]+'</button>'});
   return h+'</div><div class="row2" style="margin-top:14px"><button class="btn ghost" data-act="npShare">📤 JPG share</button><button class="btn ghost" data-act="npPdf">📄 PDF</button></div><button class="btn ghost" data-act="npZoomM">⤢ Zoom reset</button><button class="btn bad" data-act="npDelPg">🗑 Ye page hatao</button><button class="btn txt" data-act="closeSheet">Band karo</button>'}
- if(t==='cSteps'){h='<h2>📝 Step-wise hal</h2><p class="sub">Sawal: <b>'+esc(calc.expr)+'</b>'+(/sin|cos|tan|cot|sec|cosec/.test(calc.expr)?'<br>Angle: '+(calc.deg?'Degree':'Radian'):'')+(/x/.test(calc.expr)&&String(calc.x||'').trim()!==''?'<br>x = '+esc(String(calc.x))+(calc.deg?'°':''):'')+'</p>';
+ if(t==='cSteps'){h='<h2>📝 Step-wise hal</h2><p class="sub">Sawal: <b>'+esc(calc.expr)+'</b>'+(/sin|cos|tan|cot|sec|cosec/.test(calc.expr)?'<br>Angle: '+(calc.deg?'Degree':'Radian'):'')+varNote()+'</p>';
   if(calc.idn)h+='<div class="card" style="margin-top:10px">x ki kisi bhi value par is expression ka jawab ek hi aata hai, isliye ye ek identity hai. x ki value daal kar step dekh sakte ho.</div>';
   else if(calc.steps&&calc.steps.length){h+='<div style="margin-top:10px">';calc.steps.forEach(function(t,n){h+='<div class="card" style="padding:10px 14px;margin-bottom:8px"><small class="sub">Step '+(n+1)+'</small><div style="font-weight:600;word-break:break-word">'+esc(t)+'</div></div>'});h+='</div>'}
   else h+='<div class="card" style="margin-top:10px">Isme koi hisaab nahi hai, seedha number hai.</div>';

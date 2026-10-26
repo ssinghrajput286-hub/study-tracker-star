@@ -1271,7 +1271,7 @@ document.addEventListener('click',function(e){
    else{var na=0;for(var n2=1;n2<=tt.total;n2++)if(isAuto(tt.id+':'+n2))na++;
     var off=function(){mutate(function(){delete tt.sc;for(var n=1;n<=tt.total;n++){var kk=tt.id+':'+n;if(isAuto(kk)){delete S.done[kk];delete S.ssAuto[kk]}}},'Ab lecture sirf lecture tick se badhega')};
     if(na)confirmSheet('Self study se gine gaye '+na+' lecture wapas "baaki" ho jayenge. Lecture ke asli tick nahi hatenge.','Haan, band karo',off);else off()}break}
-  case 'mergeT':{var fm=findTopic(d.id);if(!fm)break;confirmSheet('"'+fm.t.name+'" ke lecture aur self study ko merge kar dun? Baad me "Alag karo" se wapas alag kar sakte ho.','Haan, merge karo',function(){mutate(function(){fm.t.merged=true},'Merge ho gaya 🔗')});break}
+  case 'mergeT':{var mtp=findTopic(d.id);if(!mtp)break;confirmSheet('"'+mtp.t.name+'" ke lecture aur self study ko merge kar dun? Baad me "Alag karo" se wapas alag kar sakte ho.','Haan, merge karo',function(){mutate(function(){mtp.t.merged=true},'Merge ho gaya 🔗')});break}
   case 'unmergeT':{var fu=findTopic(d.id);if(!fu)break;mutate(function(){delete fu.t.merged},'Alag ho gaye');break}
   case 'pickSS':openSheet({type:'pickSS'});break;
   case 'quickSS':{var fq=findTopic(d.id);if(!fq)break;var nq=nextSS(fq.t);if(!nq){toast('Is chapter ka saara self study ho gaya');break}tickSS(d.id+':'+nq);break}

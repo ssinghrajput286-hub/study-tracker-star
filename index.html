@@ -670,6 +670,7 @@ function isWEbase(d){return specKind(d)!==null}
 function isWE(d){return isWEbase(d)&&!(S.specOff&&S.specOff[d])}
 function specName(d){return specKind(d)==='pn'?'Pending notes':'Revision'}
 function specPick(pd){var k=specKind(pd),b=function(v,l){return '<button class="'+((v==='none'?k===null:k===v)?'on':'')+'" data-act="specSet" data-d="'+pd+'" data-v="'+v+'">'+l+'</button>'};return '<div class="seg" style="margin:10px 0">'+b('pn','📝 Notes')+b('rev','🔁 Revision')+b('none','📚 Normal')+'</div>'}
+var specOpen=false;
 function specSet(){
  var on=S.weekly!==false,pn=S.pnWd==null?6:S.pnWd,rv=S.revWd==null?0:S.revWd;
  var WDo=function(sel){return '<option value="-1"'+(sel<0?' selected':'')+'>Koi nahi</option>'+WD.map(function(w,i){return '<option value="'+i+'"'+(sel===i?' selected':'')+'>'+w+'war</option>'}).join('')};
@@ -679,7 +680,11 @@ function specSet(){
   h+='<label class="srow"><span class="ico">📝</span><span class="tx"><b>Pending notes ka din</b><small>Har hafte is din</small></span><select class="sel" data-ch="pnwd" aria-label="Pending notes ka din">'+WDo(pn)+'</select></label>';
   h+='<label class="srow"><span class="ico">🔁</span><span class="tx"><b>Revision ka din</b><small>Har hafte is din</small></span><select class="sel" data-ch="revwd" aria-label="Revision ka din">'+WDo(rv)+'</select></label>';
   h+='<div class="srow col"><span class="ico">📅</span><span class="tx"><b>Kisi bhi date par</b><small>Date aur type chuno. Calendar me apne aap dikhega</small></span><div class="ctl" style="display:flex;gap:8px;flex-wrap:wrap"><input class="sel" type="date" id="spD" value="'+today()+'" aria-label="Date"><select class="sel" id="spT" aria-label="Din ka type"><option value="pn">Pending notes</option><option value="rev">Revision</option><option value="none">Normal lecture din</option></select><button class="btn" data-act="specAdd">Lagao</button></div></div>';
-  Object.keys(S.specMap||{}).sort().forEach(function(d){var m=S.specMap[d];h+='<div class="srow"><span class="ico">'+(m==='pn'?'📝':m==='rev'?'🔁':'📚')+'</span><span class="tx"><b>'+esc(fmtY(d))+'</b><small>'+(m==='pn'?'Pending notes':m==='rev'?'Revision':'Normal lecture din')+'</small></span><button class="btn ghost" data-act="specDel" data-d="'+d+'" aria-label="Hatao">✕</button></div>'});
+  var ks=Object.keys(S.specMap||{}).sort();
+  if(ks.length){
+   h+='<button class="srow" data-act="specFold" aria-expanded="'+specOpen+'"><span class="ico">📁</span><span class="tx"><b>Lagayi hui dates ('+ks.length+')</b><small>'+(specOpen?'Band karne ke liye dabao':'Dekhne aur hatane ke liye dabao')+'</small></span><span class="chev">'+(specOpen?'⌄':'›')+'</span></button>';
+   if(specOpen)ks.forEach(function(d){var m=S.specMap[d];h+='<div class="srow" style="padding-left:28px"><span class="ico">'+(m==='pn'?'📝':m==='rev'?'🔁':'📚')+'</span><span class="tx" style="min-width:0"><b style="font-size:15px">'+esc(fmtY(d))+'</b><small>'+(m==='pn'?'Pending notes':m==='rev'?'Revision':'Normal lecture din')+'</small></span><button data-act="specDel" data-d="'+d+'" aria-label="Hatao" style="flex:none;width:40px;height:40px;min-width:0;padding:0;border-radius:12px;border:2px solid var(--line);background:none;font-size:18px;line-height:1">✕</button></div>'})
+  }
  }
  return h+'</div>'}
 function specArr(d){var a=S.spec&&S.spec[d];return a?a:[0,0]}
@@ -1320,6 +1325,7 @@ document.addEventListener('click',function(e){
  var el=e.target.closest('[data-act]');if(!el)return;
  var a=el.dataset.act,d=el.dataset;
  switch(a){
+  case 'specFold':specOpen=!specOpen;render();break;
   case 'specMaster':mutate(function(){S.weekly=S.weekly===false?true:false},null);break;
   case 'specAdd':{var dv=($('#spD')||{}).value,tv=($('#spT')||{}).value||'pn';if(!dv){toast('Date chuno');break}mutate(function(){S.specMap=S.specMap||{};S.specMap[dv]=tv},null);break}
   case 'specDel':{var dd=d.d;mutate(function(){if(S.specMap)delete S.specMap[dd]},null);break}

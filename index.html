@@ -573,15 +573,12 @@ var diffDays=function(a,b){return Math.round((parse(a)-parse(b))/86400000)};
 
 var THEMES={jamuni:['Jamuni','#6F55F5','111,85,245'],gulabi:['Gulabi','#D6336F','214,51,111'],hara:['Hara','#0E8F76','14,143,118'],santra:['Santra','#D9651A','217,101,26'],neela:['Neela','#2F6FEB','47,111,235'],laal:['Laal','#D92D45','217,45,69'],firozi:['Firozi','#0A93B0','10,147,176'],sunehra:['Sunehra','#B87A00','184,122,0'],phalsa:['Phalsa','#A12E8A','161,46,138']};
 
-var KEY='lecture-tracker-v1';
+var KEY='lecture-tracker-v2';
 var S,viewDate=today(),nav={tab:'aaj',stack:[]},undoStack=[],sheet=null,resetScroll=false,snapPending=null,snapUsed=true,mode='none',saveTimer=null,toastTimer=null;
 
-function defaultState(){return {v:2,start:'2026-10-22',target:4,theme:'jamuni',tpl:'bold',mode:'light',modeV:1,weekOff:-1,cele:true,confetti:true,vibrate:true,torchOff:'mysa.... ke dil ko chhuo',torchOn:'Roshni ho gayi ✨',torchColor:'#FF4D8D',lastBackup:'',rem:[],remSkip:false,dayNotes:{},
- subjects:[
-  {id:'cs',name:'Computer Science',emoji:'💻',color:'#FF9F1C',topics:[]},
-  {id:'ma',name:'Mathematics',emoji:'📐',color:'#12C2A5',topics:[]},
-  {id:'ot',name:'Other Subjects',emoji:'📚',color:'#FF5C8A',topics:[]}],
- done:{},ss:{},ssAuto:{},notes:{},missReason:{},holidays:{'2026-11-08':'Diwali','2026-11-15':'Chhath','2026-11-16':'Chhath'}}}
+function defaultState(){return {v:2,start:'2026-10-20',target:4,theme:'jamuni',tpl:'bold',mode:'light',modeV:1,weekOff:-1,cele:true,confetti:true,vibrate:true,torchOff:'mysa.... ke dil ko chhuo',torchOn:'Roshni ho gayi ✨',torchColor:'#FF4D8D',lastBackup:'',rem:[],remSkip:false,dayNotes:{},spec:{},weekly:true,
+ subjects:[{"id":"ar","name":"Arithmetic","emoji":"🧮","color":"#2EB872","topics":[{"id":"ar1","name":"Ratio & Proportion","total":6},{"id":"ar2","name":"Partnership","total":2},{"id":"ar3","name":"Average","total":5},{"id":"ar4","name":"Age","total":2},{"id":"ar5","name":"Mixture & Alligation","total":5},{"id":"ar6","name":"Time & Work","total":7},{"id":"ar7","name":"Pipe & Cistern","total":2},{"id":"ar8","name":"Speed, Time & Distance","total":6},{"id":"ar9","name":"Train","total":2},{"id":"ar10","name":"Boat & Stream","total":2},{"id":"ar11","name":"Race","total":3},{"id":"ar12","name":"Data Interpretation","total":2},{"id":"ar13","name":"Percentage","total":10},{"id":"ar14","name":"Profit & Loss","total":9},{"id":"ar15","name":"Discount","total":2},{"id":"ar16","name":"Simple Interest","total":3},{"id":"ar17","name":"Compound Interest","total":5},{"id":"ar18","name":"Installment","total":2}]},{"id":"re","name":"Reasoning","emoji":"🧠","color":"#F4B400","topics":[{"id":"re1","name":"Alphanumeric Series","total":1},{"id":"re2","name":"Blood Relation","total":4},{"id":"re3","name":"Mathematical Operations","total":2},{"id":"re4","name":"Word Building","total":3},{"id":"re5","name":"Logical Sequence Test","total":1},{"id":"re6","name":"Inserting the Missing","total":2},{"id":"re7","name":"Clock","total":4},{"id":"re8","name":"Paper Folding & Cutting","total":2},{"id":"re9","name":"Counting of Figures","total":5},{"id":"re10","name":"Coding Decoding","total":3},{"id":"re11","name":"Number Series","total":3},{"id":"re12","name":"Image","total":2},{"id":"re13","name":"Calendar","total":6},{"id":"re14","name":"Dice","total":3},{"id":"re15","name":"Alphabet Test","total":2},{"id":"re16","name":"Inequality","total":2},{"id":"re17","name":"Analogy","total":2},{"id":"re18","name":"Classification","total":2},{"id":"re19","name":"Logical Venn Diagram","total":2},{"id":"re20","name":"Syllogism","total":5},{"id":"re21","name":"Distance & Direction","total":5},{"id":"re22","name":"Seating Arrangement","total":4},{"id":"re23","name":"Puzzle","total":3},{"id":"re24","name":"Ranking Order","total":3},{"id":"re25","name":"Data Sufficiency","total":1},{"id":"re26","name":"Statement Based Question","total":2},{"id":"re27","name":"Cube & Cuboid","total":2}]},{"id":"am","name":"Advance Math","emoji":"📐","color":"#4C9AFF","topics":[{"id":"am1","name":"Number System","total":7},{"id":"am2","name":"Simplification","total":2},{"id":"am3","name":"HCF & LCM","total":2},{"id":"am4","name":"Algebra","total":9},{"id":"am5","name":"Quadratic Equations","total":1},{"id":"am6","name":"Trigonometry","total":8},{"id":"am7","name":"Maximum & Minimum Value","total":2},{"id":"am8","name":"Height & Distance","total":3},{"id":"am9","name":"Geometry","total":8},{"id":"am10","name":"Coordinate Geometry","total":2},{"id":"am11","name":"Mensuration","total":6},{"id":"am12","name":"Statistics","total":1},{"id":"am13","name":"Probability","total":2}]}],
+ done:{"ar1:1":"pre","ar1:2":"pre","ar1:3":"pre","ar1:4":"pre","ar1:5":"pre","ar1:6":"pre","ar2:1":"pre","ar2:2":"pre","ar3:1":"pre","ar3:2":"pre","ar3:3":"pre","ar3:4":"pre","ar3:5":"pre","ar4:1":"pre","ar4:2":"pre","ar5:1":"pre","ar5:2":"pre","ar5:3":"pre","ar5:4":"pre","ar5:5":"pre","ar6:1":"pre","ar6:2":"pre","ar6:3":"pre","ar6:4":"pre","ar6:5":"pre","ar6:6":"pre","ar6:7":"pre","ar7:1":"pre","ar7:2":"pre","ar8:1":"pre","ar8:2":"2026-10-20","ar8:3":"2026-10-21","ar8:4":"2026-10-21","ar8:5":"2026-10-21","ar8:6":"2026-10-21","ar9:1":"2026-10-22","ar9:2":"2026-10-22","ar10:1":"2026-10-23","re1:1":"pre","re2:1":"pre","re2:2":"pre","re2:3":"pre","re2:4":"pre","re3:1":"pre","re3:2":"pre","re4:1":"pre","re4:2":"pre","re4:3":"pre","re5:1":"pre","re6:1":"pre","re6:2":"pre","re7:1":"pre","re7:2":"pre","re7:3":"pre","re8:1":"pre","re8:2":"pre","re9:1":"pre","re9:2":"pre","re9:3":"pre","re9:4":"pre","re9:5":"pre","re10:1":"pre","re10:2":"pre","re10:3":"pre","re11:1":"pre","re11:2":"pre","re11:3":"2026-10-20","re12:1":"2026-10-22","re12:2":"2026-10-23","re13:1":"2026-10-23","am1:1":"2026-10-22","am1:2":"2026-10-23"},ss:{},ssAuto:{},notes:{},missReason:{},holidays:{'2026-11-08':'Diwali','2026-11-15':'Chhath','2026-11-16':'Chhath'}}}
 
 /* ---------- storage ---------- */
 async function initStore(){
@@ -593,6 +590,7 @@ async function initStore(){
  if(mode==='none'){try{raw=localStorage.getItem(KEY);localStorage.setItem(KEY+'-probe','1');mode='local'}catch(e){mode='none'}}
  var d=defaultState();
  if(raw){try{var o=JSON.parse(raw);if(o&&o.subjects){if(!o.v||o.v<2){var nd=defaultState();o.subjects=nd.subjects;o.done={};o.notes={};o.v=2}for(var k in d){if(o[k]===undefined)o[k]=d[k]}if(!o.modeV){if(o.mode==='auto')o.mode='light';o.modeV=1}d=o}}catch(e){}}
+ if(d.lecClr!==1){d.subjects.forEach(function(sj){sj.topics=[]});d.done={};d.ss={};d.ssAuto={};d.notes={};d.lecClr=1}
  S=d;setWarn(mode==='none');
 }
 function setWarn(on){var w=$('#warn');if(w)w.hidden=!on;warnOn=on}
@@ -625,26 +623,40 @@ function ssDone(t){var c=0;S.ss=S.ss||{};for(var n=1;n<=t.total;n++)if(S.ss[t.id
 function ssCount(d){S.ss=S.ss||{};return Object.keys(S.ss).filter(function(k){return S.ss[k]===d}).length}
 function ssTotal(){var c=0;allTopics().forEach(function(x){c+=ssDone(x.t)});return c}
 function nextSS(t){S.ss=S.ss||{};for(var n=1;n<=t.total;n++){if(!S.ss[t.id+':'+n])return n}return 0}
-function topicDone(t){var c=0;for(var n=1;n<=t.total;n++)if(S.done[t.id+':'+n])c++;return c}
+var asOf=null;
+function doneAt(v){return !!v&&(asOf===null||v==='pre'||v<=asOf)}
+function topicDone(t){var c=0;for(var n=1;n<=t.total;n++)if(doneAt(S.done[t.id+':'+n]))c++;return c}
 function subjStats(s){var d=0,tot=0;s.topics.forEach(function(t){d+=topicDone(t);tot+=t.total});return {d:d,tot:tot,p:tot?Math.round(d/tot*100):0}}
-function totals(){var d=0,tot=0,pre=0;allTopics().forEach(function(x){var t=x.t;tot+=t.total;for(var n=1;n<=t.total;n++){var v=S.done[t.id+':'+n];if(v){d++;if(v==='pre')pre++}}});return {d:d,tot:tot,pre:pre,left:tot-d}}
+function totals(){var d=0,tot=0,pre=0;allTopics().forEach(function(x){var t=x.t;tot+=t.total;for(var n=1;n<=t.total;n++){var v=S.done[t.id+':'+n];if(doneAt(v)){d++;if(v==='pre')pre++}}});return {d:d,tot:tot,pre:pre,left:tot-d}}
 function vals(){return Object.keys(S.done).map(function(k){return S.done[k]})}
 function countOn(d){return vals().filter(function(v){return v===d}).length}
-function leftAtStart(d){var c=totals().left;vals().forEach(function(v){if(v!=='pre'&&v>=d)c++});return c}
+function isWE(d){var w=parse(d).getDay();return S.weekly!==false&&(w===0||w===6)&&!(S.specOff&&S.specOff[d])}
+function isWEbase(d){var w=parse(d).getDay();return S.weekly!==false&&(w===0||w===6)}
+function specName(d){return parse(d).getDay()===6?'Pending notes':'Revision'}
+function specArr(d){var a=S.spec&&S.spec[d];return a?a:[0,0]}
+function specN(d){var a=specArr(d);return (a[0]?1:0)+(a[1]?1:0)}
+function ssOnly(d){S.ss=S.ss||{};return Object.keys(S.ss).filter(function(k){return S.ss[k]===d&&!isAuto(k)}).length}
+function dayC(d){if(!isWE(d))return countOn(d);return specN(d)*S.target/2+countOn(d)+ssOnly(d)}
+function dayP(d){return Math.round(dayC(d)/S.target*100)}
+function noLec(d){return isHol(d)||isWE(d)}
+function behind(){var td=today(),d=S.start,pl=0,n=0;while(d<td&&n++<800){if(!noLec(d))pl+=S.target;d=addDays(d,1)}var dn=0;Object.keys(S.done).forEach(function(k){var v=S.done[k];if(v!=='pre'&&v<td&&!isAuto(k)||(v!=='pre'&&v<td))dn++});return Math.max(0,pl-dn)}
+function noReason(){return missedDays().filter(function(d){return !S.missReason[d]}).length}
+function leftAtStart(d){var sv=asOf;asOf=null;var c=totals().left;asOf=sv;vals().forEach(function(v){if(v!=='pre'&&v>=d)c++});return c}
 function hasHol(d){return Object.prototype.hasOwnProperty.call(S.holidays,d)}
 function isHol(d){return hasHol(d)||(S.weekOff>=0&&parse(d).getDay()===S.weekOff)}
 function holName(d){if(hasHol(d))return S.holidays[d];if(S.weekOff>=0&&parse(d).getDay()===S.weekOff)return 'Saptahik chhutti ('+WD[S.weekOff]+'war)';return undefined}
-function dayMet(d){var c=countOn(d);if(c>=S.target)return true;return c>0&&leftAtStart(d)-c===0}
+function dayMet(d){if(isWE(d)&&!isHol(d))return specN(d)===2||countOn(d)>=S.target;var c=countOn(d);if(c>=S.target)return true;return c>0&&leftAtStart(d)-c===0}
 function missedDays(){var out=[],td=today(),d=S.start,n=0;while(d<td&&n++<800){if(!isHol(d)&&!dayMet(d)&&leftAtStart(d)>0)out.push(d);d=addDays(d,1)}return out}
 function streaks(){var td=today(),run=0,best=0,d=S.start,n=0;
  while(d<=td&&n++<800){if(!isHol(d)){if(dayMet(d)){run++;if(run>best)best=run}else if(d!==td&&leftAtStart(d)>0)run=0}d=addDays(d,1)}
  return {cur:run,best:best}}
 function forecast(){var t=totals();if(t.left<=0)return null;var d=today();if(d<S.start)d=S.start;
- var cap=isHol(d)?0:Math.max(0,S.target-countOn(d)),need=t.left,n=0;
- while(n++<2000){need-=cap;if(need<=0)return d;d=addDays(d,1);cap=isHol(d)?0:S.target}return d}
+ var cap=noLec(d)?0:Math.max(0,S.target-countOn(d)),need=t.left,n=0;
+ while(n++<2000){need-=cap;if(need<=0)return d;d=addDays(d,1);cap=noLec(d)?0:S.target}return d}
 function ideal(){var t=totals(),need=t.tot-t.pre,d=S.start,n=0;if(need<=0)return S.start;
- while(n++<2000){if(!isHol(d)){need-=S.target;if(need<=0)return d}d=addDays(d,1)}return d}
-function nextUndone(t){for(var n=1;n<=t.total;n++){if(!S.done[t.id+':'+n])return n}return 0}
+ while(n++<2000){if(!noLec(d)){need-=S.target;if(need<=0)return d}d=addDays(d,1)}return d}
+function nextUndone(t){for(var n=1;n<=t.total;n++){if(!doneAt(S.done[t.id+':'+n]))return n}return 0}
+function nextUndoneG(t){for(var n=1;n<=t.total;n++){if(!S.done[t.id+':'+n])return n}return 0}
 
 /* ---------- theme ---------- */
 function mix(a,b,t){var A=[1,3,5].map(function(i){return parseInt(a.substr(i,2),16)}),B=[1,3,5].map(function(i){return parseInt(b.substr(i,2),16)});return '#'+A.map(function(x,i){return Math.round(x+(B[i]-x)*t).toString(16).padStart(2,'0')}).join('')}
@@ -660,13 +672,26 @@ function ring(p,size,sw,col,track,inner){var r=(size-sw)/2,c=2*Math.PI*r,off=c*(
 function cur(){return nav.stack[nav.stack.length-1]}
 function msgFor(p,hol){if(hol)return 'Aaj aaram ka din 🌴';if(p===0)return 'Chalo shuru karte hain! 🚀';if(p<50)return 'Achhi shuruaat, lage raho 👍';if(p<100)return 'Bas thoda aur, tum kar loge 💪';return 'Aaj ka target poora! 🏆'}
 
+
+function heroSpec(){var nm=specName(viewDate),a=specArr(viewDate),p=dayP(viewDate),n=specN(viewDate),ex=countOn(viewDate)+ssOnly(viewDate);
+ var box=function(i){return '<button data-act="spec" data-i="'+i+'" aria-pressed="'+(a[i]?'true':'false')+'" aria-label="'+nm+' '+(i+1)+'" style="flex:1;height:96px;border-radius:22px;border:3px '+(a[i]?'solid #14122B;background:rgba(20,18,43,.14)':'dashed rgba(20,18,43,.45);background:transparent')+';font-size:38px;color:#14122B;cursor:pointer">'+(a[i]?'✓':'')+'</button>'};
+ return '<div style="background:#FFD95A;color:#14122B;border-radius:28px;padding:22px 20px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><b style="font-size:19px">Aaj ke 100% me se</b><div style="opacity:.75;margin-top:2px">'+nm+' '+n+' / 2'+(ex?' · extra '+ex:'')+'</div></div><b style="font-size:44px;line-height:1">'+p+'<small style="font-size:22px">%</small></b></div><div style="display:flex;gap:12px;margin:16px 0">'+box(0)+box(1)+'</div><b style="font-size:17px">'+(p>100?'Extra mehnat! 🔥':p>=100?'Aaj ka din poora! 🏆':p===0?'Chalo shuru karte hain!':'Bas ek aur click 💪')+'</b></div>'}
+function specCard(){var nm=specName(viewDate),a=specArr(viewDate),p=dayP(viewDate),n=specN(viewDate);
+ return '<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><b style="font-size:19px">'+nm+'</b><div class="sub">'+(n===0?'Abhi shuru nahi hua':n===1?'Ek ho gaya, ek baaki':'Dono ho gaye ✓')+'</div></div><div style="background:#FF9466;color:#14122B;font-weight:700;border-radius:18px;padding:14px 18px;font-size:19px">'+p+'%</div></div><div style="display:flex;gap:10px;margin-top:12px">'+[0,1].map(function(i){return '<button data-act="spec" data-i="'+i+'" aria-label="'+nm+' '+(i+1)+'" style="flex:1;height:10px;border:0;border-radius:6px;background:'+(a[i]?'#2EB872':'rgba(140,136,168,.4)')+'"></button>'}).join('')+'</div><p class="sub" style="margin:10px 0 0">Har click = 50%. Extra lecture ya self study karo to % 100 se upar jayega.</p></div>'}
+function quickBlock(){var h='',b=behind(),nr=noReason();
+ if(b||nr)h+='<div style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 12px">'+(b?'<button data-act="tab" data-v="plan" style="border:0;border-radius:18px;padding:10px 14px;font-weight:700;background:rgba(214,51,111,.25);color:#FF6B9A">'+b+' lecture peeche</button>':'')+(nr?'<button data-act="tab" data-v="plan" style="border:0;border-radius:18px;padding:10px 14px;font-weight:700;background:#FF6B9A;color:#14122B">⚠️ '+nr+' din ka reason baaki</button>':'')+'</div>';
+ S.subjects.forEach(function(s){var st=subjStats(s),nx=null;if(!st.tot)return;for(var i=0;i<s.topics.length&&!nx;i++){var t=s.topics[i],n=nextUndone(t);if(n)nx={t:t,n:n}}
+  h+='<div class="card" style="display:flex;align-items:center;gap:14px;margin-bottom:12px;padding:14px">'+ring(st.p,64,8,s.color,'rgba(140,136,168,.3)','<b style="color:'+s.color+';font-size:14px">'+st.p+'%</b>')+'<div style="flex:1;min-width:0"><b style="font-size:19px">'+esc(s.name)+'</b><div class="sub">'+st.d+' / '+st.tot+' hue</div><div style="color:'+s.color+';font-weight:700">'+(nx?'Agla: '+esc(nx.t.name)+' '+nx.n:'Sab khatam 🎉')+'</div></div>'+(nx&&(function(){var g=null;for(var i2=0;i2<s.topics.length&&!g;i2++){var n2=nextUndoneG(s.topics[i2]);if(n2)g={t:s.topics[i2],n:n2}}return g&&g.t===nx.t&&g.n===nx.n})()?'<button data-act="qtick" data-id="'+s.id+'" aria-label="'+esc(s.name)+' ka agla lecture tick karo" style="width:62px;height:56px;border:0;border-radius:18px;background:'+s.color+';color:#14122B;font-size:28px;cursor:pointer">✓</button>':'')+'</div>'});
+ return h}
+function weBlock(){return (isWE(viewDate)&&holName(viewDate)===undefined?specCard():'')+quickBlock()}
 function screenAaj0(){
  var td=today(),c=countOn(viewDate),tg=S.target,p=Math.round(c/tg*100),hol=holName(viewDate),t=totals(),st=streaks();
  var h='<div class="datebar"><button class="ib" data-act="prevDay" aria-label="Pichla din">‹</button><label class="dpick"><span>'+(viewDate===td?'<small>Aaj</small>':'')+esc(fmtY(viewDate))+'</span><input type="date" data-ch="vd" value="'+viewDate+'" aria-label="Date chuno"></label><button class="ib" data-act="nextDay" aria-label="Agla din">›</button></div>';
  if(viewDate!==td)h+='<button class="btn ghost" style="margin:0 0 12px;min-height:46px" data-act="goToday">Aaj par wapas chalo</button>';
  if(hol!==undefined)h+='<div class="card" style="background:var(--pt);box-shadow:none"><b>🌴 Chhutti: '+esc(hol)+'</b><div class="sub">Is din ka target nahi ginta jaata.</div><button class="btn ghost" style="background:var(--card);min-height:46px" '+(hasHol(viewDate)?'data-act="delHol" data-d="'+viewDate+'">Chhutti hatao</button>':'data-act="tab" data-v="set">Settings me badlo</button>')+'</div>';
- h+='<div class="hero">'+ring(p,116,12,'#fff','rgba(255,255,255,.28)',hol!==undefined&&!c?'🌴':p+'%')+'<div><div class="big">'+c+' / '+tg+' <small>'+(allTopics().some(function(x){return x.t.sc&&!x.t.merged})?'lecture + self study':'lecture')+'</small></div><p>'+msgFor(p,hol!==undefined&&!c)+'</p></div></div>';
+ if(isWE(viewDate)&&hol===undefined)h+=heroSpec()+weBlock();else{h+='<div class="hero">'+ring(p,116,12,'#fff','rgba(255,255,255,.28)',hol!==undefined&&!c?'🌴':p+'%')+'<div><div class="big">'+c+' / '+tg+' <small>'+(allTopics().some(function(x){return x.t.sc&&!x.t.merged})?'lecture + self study':'lecture')+'</small></div><p>'+msgFor(p,hol!==undefined&&!c)+'</p></div></div>';}
  h+='<div class="chips"><div class="chip">🔥 Streak<b>'+st.cur+' din</b></div><div class="chip">📚 Total bacha<b>'+t.left+' / '+t.tot+'</b></div><div class="chip">📖 Self study<b>'+ssCount(viewDate)+' aaj</b></div></div>';
+ if(!(isWE(viewDate)&&hol===undefined))h+=weBlock();
  h+='<div class="row2" style="margin-bottom:12px"><button class="btn pri" style="margin-top:0" data-act="pick">🎬 Lecture tick karo</button><button class="btn pri" style="margin-top:0;background:#12C2A5;color:#14122B" data-act="pickSS">📖 Self study tick karo</button></div>';
  h+='<div class="sec">'+(viewDate===td?'Aaj ke tick':esc(fmt(viewDate))+' ke tick')+'</div>';
  var rows='';allTopics().forEach(function(x){for(var n=1;n<=x.t.total;n++){var k=x.t.id+':'+n;if(S.done[k]===viewDate&&!isAuto(k)){rows+='<button class="item" style="--c:'+x.s.color+'" data-act="lec" data-k="'+k+'"><span class="dot"></span><span class="t"><b>'+esc(x.t.name)+'</b><small>Lecture '+n+(S.notes[k]?' 📝':'')+'</small></span><span class="go">✓</span></button>'}}});
@@ -679,7 +704,7 @@ function screenAaj0(){
 /* ---------- template kits: alag structure ---------- */
 var TPLK={};
 function kitOn(){return TPLK[(TPLX.some(function(x){return x[0]===S.tpl})?S.tpl:'bold')]||null}
-function screenAaj(){var K=kitOn();return K&&K.aaj?K.aaj():screenAaj0()}
+function screenAaj(){asOf=viewDate;try{var K=kitOn();if(K&&K.aaj){var kh=K.aaj();return (isWE(viewDate)&&holName(viewDate)===undefined?heroSpec():'')+weBlock()+kh}return screenAaj0()}finally{asOf=null}}
 function screenLec(){var K=kitOn();return K&&K.lec?K.lec():screenLec0()}
 function screenSubj(id){var K=kitOn();return K&&K.subj?K.subj(id):screenSubj0(id)}
 function screenTopic(id){var K=kitOn();return K&&K.topic?K.topic(id):screenTopic0(id)}
@@ -695,7 +720,7 @@ function kxFoot(){var dn=S.dayNotes[viewDate];
 function kxTicks(){var a=[];allTopics().forEach(function(x){for(var n=1;n<=x.t.total;n++){var k=x.t.id+':'+n;if(S.done[k]===viewDate&&!isAuto(k))a.push({k:k,s:x.s,t:x.t,n:n,kind:'lec'})}});
  allTopics().forEach(function(x){for(var n=1;n<=x.t.total;n++){var k=x.t.id+':'+n;if(S.ss&&S.ss[k]===viewDate)a.push({k:k,s:x.s,t:x.t,n:n,kind:'ss',auto:isAuto(k)})}});return a}
 function kxWeek(){var a=[];for(var i=6;i>=0;i--){var d=addDays(viewDate,-i);a.push({d:d,c:countOn(d),L:'SMTWTFS'.charAt(parse(d).getDay()),on:d===viewDate})}return a}
-function kxD(){var c=countOn(viewDate),tg=S.target,hol=holName(viewDate);return {td:today(),c:c,tg:tg,p:Math.round(c/tg*100),hol:hol,t:totals(),st:streaks(),ss:ssCount(viewDate),msg:msgFor(Math.round(c/tg*100),hol!==undefined&&!c),ttl:viewDate===today()?'Aaj ke tick':fmt(viewDate)+' ke tick'}}
+function kxD(){var c=dayC(viewDate),tg=S.target,hol=holName(viewDate);return {td:today(),c:c,tg:tg,p:Math.round(c/tg*100),hol:hol,t:totals(),st:streaks(),ss:ssCount(viewDate),msg:msgFor(Math.round(c/tg*100),hol!==undefined&&!c),ttl:viewDate===today()?'Aaj ke tick':fmt(viewDate)+' ke tick'}}
 function kxCards(t){var h='';
  if(!t.merged)h+='<div class="card" style="display:flex;align-items:center;gap:12px;padding:12px 14px"><div style="flex:1"><b>📖 Self study se bhi complete</b><div class="sub">ON ho to 📖 tick lecture ki tarah gina jayega (target, progress, streak). OFF ho to lecture sirf lecture tick se badhega.</div></div><button class="swt" role="switch" aria-checked="'+(!!t.sc)+'" aria-label="Self study se bhi chapter complete" data-act="ssCountT" data-id="'+t.id+'"></button></div>';
  if(canMerge(t))h+='<div class="card" style="background:var(--pt);box-shadow:none"><b>🔗 Lecture aur self study dono poore!</b><div class="sub">Dono record ek me merge kar sakte ho. Phir ek hi percentage dikhega aur aage ke tick lecture ke honge.</div><button class="btn pri" style="min-height:46px" data-act="mergeT" data-id="'+t.id+'">🔗 Merge karo</button></div>';
@@ -968,6 +993,7 @@ function screenTopic0(id){
   h+='<div class="lrow'+(v?' on':'')+'" style="--c:'+s.color+'"><button class="chk" data-act="tog" data-k="'+k+'" aria-pressed="'+(!!v)+'" aria-label="Lecture '+n+' tick">'+(v?'✓':'')+'</button>'+(t.merged?'':'<button class="chk ss'+(sv?' on':'')+'" data-act="togSS" data-k="'+k+'" aria-pressed="'+(!!sv)+'" aria-label="Lecture '+n+' self study tick">📖</button>')+'<div class="lt"><b>Lecture '+n+'</b><small>'+(v?(v==='pre'?'Pehle se complete':isAuto(k)?'Self study se complete: '+esc(fmt(v)):'Lecture dekha: '+esc(fmt(v))):'Lecture baaki')+'</small>'+(sv&&!t.merged&&!isAuto(k)?'<small>📖 Self study: '+esc(fmt(sv))+'</small>':'')+(nt?'<small>📝 '+esc(nt)+'</small>':'')+'</div><button class="nb'+(nt?' has':'')+'" data-act="lec" data-k="'+k+'" aria-label="Note likho">📝</button></div>'}
  return h}
 
+
 function evOf(d){S.events=S.events||{};return S.events[d]||[]}
 var INDIA_EV='2026-01-01|New Year\'s Day|b\n2026-01-03|Hazrat Ali\'s Birthday|b\n2026-01-13|Lohri|k\n2026-01-14|Makar Sankranti|b\n2026-01-14|Pongal|b\n2026-01-23|Vasant Panchami|b\n2026-01-26|Republic Day|p\n2026-02-01|Guru Ravidas Jayanti|b\n2026-02-12|Maharishi Dayanand Saraswati Jayanti|b\n2026-02-14|Valentine\'s Day|k\n2026-02-15|Maha Shivaratri|b\n2026-02-17|Lunar New Year|k\n2026-02-19|Shivaji Jayanti|b\n2026-02-19|Ramadan Start|k\n2026-03-03|Holika Dahana|b\n2026-03-04|Holi|p\n2026-03-19|Cheti Chand|b\n2026-03-19|Gudi Padwa|b\n2026-03-19|Ugadi|b\n2026-03-20|Jamat Ul-Vida|b\n2026-03-21|Ramzan Id|p\n2026-03-26|Rama Navami|p\n2026-03-31|Mahavir Jayanti|p\n2026-04-02|First day of Passover|k\n2026-04-02|Maundy Thursday|k\n2026-04-03|Good Friday|p\n2026-04-14|Ambedkar Jayanti|p\n2026-04-14|Mesadi|b\n2026-04-14|Vaisakhi|b\n2026-04-14|Vishu|b\n2026-04-15|Bahag Bihu|b\n2026-04-15|Vaisakhadi|b\n2026-05-01|Buddha Purnima|p\n2026-05-01|International Worker\'s Day|k\n2026-05-09|Birthday of Rabindranath|b\n2026-05-10|Mother\'s Day|k\n2026-05-28|Bakrid|p\n2026-06-21|Father\'s Day|k\n2026-06-26|Muharram/Ashura|p\n2026-07-16|Rath Yatra|b\n2026-07-29|Guru Purnima|b\n2026-08-02|Friendship Day|k\n2026-08-15|Independence Day|p\n2026-08-15|Parsi New Year|b\n2026-08-26|Milad un-Nabi|p\n2026-08-26|Onam|b\n2026-08-28|Raksha Bandhan|b\n2026-09-04|Janmashtami|p\n2026-09-04|Janmashtami (Smarta)|k\n2026-09-14|Ganesh Chaturthi|b\n2026-10-02|Mahatma Gandhi Jayanti|p\n2026-10-11|First Day of Sharad Navratri|k\n2026-10-17|First Day of Durga Puja|k\n2026-10-18|Maha Saptami|b\n2026-10-19|Maha Ashtami|b\n2026-10-20|Dussehra|p\n2026-10-26|Maharishi Valmiki Jayanti|b\n2026-10-29|Karaka Chaturthi|b\n2026-10-31|Halloween|k\n2026-11-08|Diwali/Deepavali|p\n2026-11-08|Naraka Chaturdasi|b\n2026-11-09|Govardhan Puja|b\n2026-11-11|Bhai Duj|b\n2026-11-15|Chhat Puja|b\n2026-11-24|Guru Nanak Jayanti|p\n2026-11-24|Guru Tegh Bahadur\'s Martyrdom Day|b\n2026-12-05|First Day of Hanukkah|k\n2026-12-12|Last day of Hanukkah|k\n2026-12-23|Hazrat Ali\'s Birthday|b\n2026-12-24|Christmas Eve|b\n2026-12-25|Christmas|p\n2026-12-31|New Year\'s Eve|k\n2027-01-01|New Year\'s Day|b\n2027-01-14|Makar Sankranti|b\n2027-01-15|Guru Govind Singh Jayanti|b\n2027-01-15|Pongal|b\n2027-01-26|Republic Day|p\n2027-02-06|Lunar New Year|k\n2027-02-09|Ramadan Start|k\n2027-02-11|Vasant Panchami|b\n2027-02-14|Valentine\'s Day|k\n2027-02-19|Shivaji Jayanti|b\n2027-02-20|Guru Ravidas Jayanti|b\n2027-03-02|Maharishi Dayanand Saraswati Jayanti|b\n2027-03-05|Jamat Ul-Vida|b\n2027-03-06|Maha Shivaratri|b\n2027-03-10|Ramzan Id|p\n2027-03-22|Holi|p\n2027-03-22|Dolyatra|b\n2027-03-22|Holika Dahana|b\n2027-03-25|Maundy Thursday|k\n2027-03-26|Good Friday|p\n2027-04-07|Chaitra Sukhladi|b\n2027-04-07|Cheti Chand|b\n2027-04-07|Gudi Padwa|b\n2027-04-07|Ugadi|b\n2027-04-14|Mesadi|b\n2027-04-14|Vaisakhi|b\n2027-04-14|Vishu|b\n2027-04-14|Ambedkar Jayanti|k\n2027-04-15|Rama Navami|p\n2027-04-15|Bahag Bihu|b\n2027-04-15|Vaisakhadi|b\n2027-04-19|Mahavir Jayanti|p\n2027-04-22|First day of Passover|k\n2027-05-01|International Worker\'s Day|k\n2027-05-09|Birthday of Rabindranath|b\n2027-05-09|Mother\'s Day|k\n2027-05-17|Bakrid|p\n2027-05-20|Buddha Purnima|p\n2027-06-16|Muharram/Ashura|p\n2027-06-20|Father\'s Day|k\n2027-07-05|Rath Yatra|b\n2027-08-01|Friendship Day|k\n2027-08-15|Independence Day|p\n2027-08-15|Milad un-Nabi|p\n2027-08-15|Parsi New Year|b\n2027-08-17|Raksha Bandhan|b\n2027-08-25|Janmashtami|p\n2027-08-25|Janmashtami (Smarta)|k\n2027-09-04|Ganesh Chaturthi|b\n2027-09-12|Onam|b\n2027-09-30|First Day of Sharad Navratri|k\n2027-10-02|Mahatma Gandhi Jayanti|p\n2027-10-05|First Day of Durga Puja|k\n2027-10-06|Maha Saptami|b\n2027-10-07|Maha Ashtami|b\n2027-10-08|Maha Navami|b\n2027-10-09|Dussehra|p\n2027-10-15|Maharishi Valmiki Jayanti|b\n2027-10-18|Karaka Chaturthi|b\n2027-10-28|Naraka Chaturdasi|b\n2027-10-29|Diwali/Deepavali|p\n2027-10-30|Govardhan Puja|b\n2027-10-31|Bhai Duj|b\n2027-10-31|Halloween|k\n2027-11-04|Chhat Puja|b\n2027-11-14|Guru Nanak Jayanti|p\n2027-11-24|Guru Tegh Bahadur\'s Martyrdom Day|b\n2027-12-12|Hazrat Ali\'s Birthday|b\n2027-12-24|Christmas Eve|b\n2027-12-25|Christmas|p\n2027-12-25|First Day of Hanukkah|k\n2027-12-31|New Year\'s Eve|k\n2028-01-01|New Year\'s Day|b\n2028-01-01|Last day of Hanukkah|k\n2028-01-15|Makar Sankranti|b\n2028-01-15|Pongal|b\n2028-01-26|Republic Day|p\n2028-01-26|Lunar New Year|k\n2028-01-29|Ramadan Start|k\n2028-01-31|Vasant Panchami|b\n2028-02-14|Valentine\'s Day|k\n2028-02-19|Shivaji Jayanti|b\n2028-02-23|Maha Shivaratri|p\n2028-02-27|Ramzan Id|p\n2028-03-11|Holi|p\n2028-03-27|Gudi Padwa|b\n2028-03-27|Ugadi|b\n2028-04-03|Rama Navami|p\n2028-04-07|Mahavir Jayanti|p\n2028-04-11|First day of Passover|k\n2028-04-13|Maundy Thursday|k\n2028-04-14|Good Friday|p\n2028-04-14|Ambedkar Jayanti|k\n2028-05-01|International Worker\'s Day|k\n2028-05-06|Bakrid|p\n2028-05-14|Mother\'s Day|k\n2028-06-04|Muharram/Ashura|p\n2028-06-18|Father\'s Day|k\n2028-06-24|Rath Yatra|b\n2028-08-05|Raksha Bandhan|b\n2028-08-06|Friendship Day|k\n2028-08-13|Janmashtami|p\n2028-08-13|Janmashtami (Smarta)|b\n2028-08-15|Independence Day|p\n2028-08-23|Ganesh Chaturthi|b\n2028-09-01|Onam|b\n2028-09-19|First Day of Sharad Navratri|k\n2028-09-24|First Day of Durga Puja|k\n2028-09-27|Dussehra|p\n2028-10-02|Mahatma Gandhi Jayanti|p\n2028-10-07|Karaka Chaturthi|b\n2028-10-17|Diwali/Deepavali|p\n2028-10-19|Bhai Duj|b\n2028-10-23|Chhat Puja|b\n2028-10-31|Halloween|k\n2028-11-24|Guru Tegh Bahadur\'s Martyrdom Day|b\n2028-12-01|Hazrat Ali\'s Birthday|b\n2028-12-13|First Day of Hanukkah|k\n2028-12-20|Last day of Hanukkah|k\n2028-12-24|Christmas Eve|b\n2028-12-25|Christmas|p\n2028-12-31|New Year\'s Eve|k';
 function seedIndia(){if(!S||S.indiaV===1)return;S.events=S.events||{};INDIA_EV.split('\n').forEach(function(l,ix){var a=l.split('|'),L=(S.events[a[0]]=S.events[a[0]]||[]);if(!L.some(function(x){return x.n===a[1]}))L.push({id:'i'+ix,n:a[1],k:a[2]==='k'?'ev':'fest',h:false,g:a[2]==='p'?1:0})});S.indiaV=1;save()}
@@ -981,7 +1007,7 @@ function screenEvents(){S.events=S.events||{};var ks=Object.keys(S.events).filte
  return h+'<button class="btn pri" data-act="evAdd" data-d="'+viewDate+'">\uff0b Event / Tyohaar jodo</button>'}
 var pmon=null,PMN=['January','February','March','April','May','June','July','August','September','October','November','December'];
 function pcInfo(d){var f=pcInfo0(d),ev=evOf(d);if(ev.length&&d>=S.start||ev.length&&f.k==='dim'){var ie=ev.some(function(x){return x.k==='fest'})?'\ud83e\ude94':'\ud83c\udf89';if(f.k==='dim')f={k:'',e:ie};else if(!f.e||f.e===ie)f.e=ie;else if(f.k!=='hl')f.e+=ie}f.ev=ev;return f}
-function pcInfo0(d){var td=today(),c=countOn(d),hol=holName(d),isH=isHol(d);
+function pcInfo0(d){var td=today(),c=dayC(d),hol=holName(d),isH=isHol(d);
  if(d<S.start)return {k:'dim',e:''};
  if(isH&&!c)return {k:'hl',e:/diwali|holi|eid|chhath|dussehra|dasara|navratri|durga|raksha|rakhi|christmas|pongal|onam|baisakhi|lohri|janmashtami|ganesh|tyohaar|tyauhar|bhai dooj|dhanteras|makar/i.test(hol||'')?'\ud83e\ude94':'\ud83c\udfd6\ufe0f',h:hol};
  if(dayMet(d))return {k:'ok',e:'\u2705'};
@@ -997,7 +1023,7 @@ function pcCal(){var td=today();if(!pmon)pmon=td.slice(0,7);
  h+='</div><div class="pc-lg"><span>\u2705 Poora</span><span>\ud83c\udf17 Adhura</span><span>\ud83d\udc94 Chhoota</span><span>\ud83c\udfd6\ufe0f Chhutti</span><span>\ud83e\ude94 Tyohaar</span></div>';
  var ms=missedDays().reverse();
  if(ms.length){h+='<div class="pc-sec"><span>\ud83d\udcad Chhoote din</span><small>'+ms.length+'</small></div>';
-  ms.slice(0,6).forEach(function(d){var p=S.target?Math.round(countOn(d)/S.target*100):0;h+='<button class="pc-row" data-act="pDay" data-d="'+d+'"><span class="ic">\ud83d\udc94</span><span class="t"><b>'+esc(fmtY(d).replace(/ \d{4}$/,''))+' \u00b7 '+p+'%</b><small>'+esc(S.missReason[d]||'Reason likho \u270d\ufe0f')+'</small></span><span class="go">\u203a</span></button>'});
+  ms.slice(0,6).forEach(function(d){var p=S.target?Math.round(dayC(d)/S.target*100):0;h+='<button class="pc-row" data-act="pDay" data-d="'+d+'"><span class="ic">\ud83d\udc94</span><span class="t"><b>'+esc(fmtY(d).replace(/ \d{4}$/,''))+' \u00b7 '+p+'%</b><small>'+esc(S.missReason[d]||'Reason likho \u270d\ufe0f')+'</small></span><span class="go">\u203a</span></button>'});
   if(ms.length>6)h+='<button class="btn ghost" data-act="openMissed">Saare '+ms.length+' chhoote din dekho</button>'}
  return h+'<div style="height:14px"></div>'}
 function screenPlan(){
@@ -1029,7 +1055,7 @@ function screenDwList(){
  h+='<div class="dwtot"><small>📚 Total lecture hue</small><b>'+(t.d-t.pre)+'</b></div>';
  h+='<button class="btn pri" style="margin:0 0 16px" data-act="repAll">📄 PDF banao aur share karo</button>';
  days.slice().reverse().forEach(function(x){
-  var c=countOn(x),hol=isHol(x),met=dayMet(x),pc=S.target?Math.round(c/S.target*100):0,col,tag;
+  var c=dayC(x),hol=isHol(x),met=dayMet(x),pc=S.target?Math.round(c/S.target*100):0,col,tag;
   if(hol&&!c){col='#12C2A5';tag='Chhutti'}
   else if(met){col='#12A87A';tag='Target poora ✓'}
   else if(x===td){col='#6F55F5';tag='Aaj baaki'}
@@ -1155,19 +1181,20 @@ function sheetBody(){var h,k,f,v;
   if(!mg)h+='<button class="btn '+(sv2?'ghost':'pri')+'" style="'+(sv2?'':'background:#12C2A5;color:#14122B')+'" data-act="ssTick">'+(sv2?'📖 Self study untick karo (hua: '+esc(fmt(sv2))+')':'📖 Self study kiya, '+esc(fmt(viewDate))+' ko tick karo')+'</button>';
   if(v&&v!=='pre'&&v!==viewDate)h+='<button class="btn ghost" data-act="lecMove">Is date par le aao ('+esc(fmt(viewDate))+')</button>';
   return h+'<button class="btn txt" data-act="closeSheet">Band karo</button>'}
- if(sheet.type==='pday'){var pd=sheet.d,pf=pcInfo(pd),pc=countOn(pd),pp=S.target?Math.round(pc/S.target*100):0,nm={ok:'Target poora \u2705',half:'Adhura \ud83c\udf17',bad:'Chhoota \ud83d\udc94',hl:'Chhutti '+(pf.e||''),fut:'Aane wala din',dim:'Plan shuru hone se pehle','':'Koi kaam nahi abhi'}[pf.k];
+ if(sheet.type==='pday'){var pd=sheet.d,pf=pcInfo(pd),pc=dayC(pd),pp=S.target?Math.round(pc/S.target*100):0,nm={ok:'Target poora \u2705',half:'Adhura \ud83c\udf17',bad:'Chhoota \ud83d\udc94',hl:'Chhutti '+(pf.e||''),fut:'Aane wala din',dim:'Plan shuru hone se pehle','':'Koi kaam nahi abhi'}[pf.k];
   h='<h2>'+esc(fmtY(pd))+'</h2><p class="sub">'+esc(nm)+(pf.h?' \u00b7 '+esc(pf.h):'')+'</p>';
   pf.ev.forEach(function(x){h+='<div class="dwtot" style="margin:8px 0"><small>'+(x.k==='fest'?'Tyohaar':'Event')+'</small><b>'+evIco(x)+' '+esc(x.n)+'</b></div>'});
   if(pd>=S.start)h+='<div class="dwtot" style="margin:10px 0"><small>\ud83d\udcda Lecture</small><b>'+pc+' / '+S.target+' ('+pp+'%)</b></div>';
   if(pf.k==='bad'||pf.k==='half'&&pd<today())h+='<textarea class="ta" rows="2" maxlength="160" placeholder="Kyun chhoota? Reason likho" data-bind="miss:'+pd+'" aria-label="Reason">'+esc(S.missReason[pd]||'')+'</textarea>';
   h+='<button class="btn pri" data-act="goDay" data-d="'+pd+'">Is date par tick karo</button>';
   h+='<button class="btn ghost" data-act="evAdd" data-d="'+pd+'">\ud83e\ude94 Event / Tyohaar jodo</button>';
+  if(isWEbase(pd)){var spn=parse(pd).getDay()===6?'Pending notes':'Revision',spo=!!(S.specOff&&S.specOff[pd]);h+='<div class="dwtot" style="margin:10px 0"><small>'+spn+'</small><b>'+(spo?'OFF (normal lecture din)':'ON')+'</b></div><button class="btn ghost" data-act="specDay" data-d="'+pd+'">'+(spo?'\u2705 '+spn+' ON karo':'\u26d4 '+spn+' OFF karo')+'</button>'}
   h+=hasHol(pd)?'<button class="btn ghost" data-act="pDelHol" data-d="'+pd+'">\ud83c\udfd6\ufe0f Chhutti hatao</button>':'<button class="btn ghost" data-act="addHol" data-d="'+pd+'">\ud83c\udfd6\ufe0f Chhutti lo</button>';
   return h+'<button class="btn txt" data-act="closeSheet">Band karo</button>'}
  if(sheet.type==='evadd'){
   var chips=['Diwali','Holi','Eid','Dussehra','Raksha Bandhan','Chhath','Test','Birthday'].map(function(n){return '<button class="chp'+(sheet.n===n?' on':'')+'" data-act="evChip" data-n="'+n+'">'+n+'</button>'}).join('');
   return '<h2>Event / Tyohaar jodo</h2><div class="pc-h" style="margin:8px 0"><button data-act="evStep" data-v="-30" aria-label="Pichla mahina">\u00ab</button><button data-act="evStep" data-v="-1" aria-label="Pichla din">\u2039</button><b style="font-size:16px">'+esc(fmtY(sheet.d))+'</b><button data-act="evStep" data-v="1" aria-label="Agla din">\u203a</button><button data-act="evStep" data-v="30" aria-label="Agla mahina">\u00bb</button></div><div class="pc-lg" style="margin:6px 0 10px">'+chips+'</div><input class="inp" type="text" id="evName" maxlength="40" inputmode="text" autocomplete="off" placeholder="Ya apna naam likho" value="'+esc(sheet.n||'')+'" aria-label="Naam"><div class="seg" style="margin:10px 0"><button class="'+(sheet.k!=='ev'?'on':'')+'" data-act="evKind" data-v="fest">\ud83e\ude94 Tyohaar</button><button class="'+(sheet.k==='ev'?'on':'')+'" data-act="evKind" data-v="ev">\ud83c\udf89 Event</button></div><button class="srow" style="width:100%;margin:6px 0" data-act="evHolT"><span class="ico">'+(sheet.h===false?'\u2b1c':'\u2705')+'</span><span class="tx"><b>Is din chhutti bhi lo</b><small>Us din ka target nahi lagega</small></span></button><button class="btn pri" data-act="evSave">Save karo</button><button class="btn txt" data-act="closeSheet">Raho</button>'}
- if(sheet.type==='hol'){
+  if(sheet.type==='hol'){
   return '<h2>Chhutti lo</h2><p class="sub">Is din ka kaam aage ke dinon me khisak jayega.</p><input class="inp" type="date" id="hDate" value="'+sheet.d+'" aria-label="Date"><input class="inp" type="text" id="hWhy" maxlength="60" placeholder="Reason (jaise Diwali, bimaar)" value="'+esc(S.holidays[sheet.d]||'')+'" aria-label="Reason"><button class="btn pri" data-act="saveHol">Chhutti pakki karo</button><button class="btn txt" data-act="closeSheet">Raho</button>'}
  if(sheet.type==='topic'){var ed=!!sheet.id,t=ed?findTopic(sheet.id).t:{name:'',total:5};
   h='<h2>'+(ed?'Chapter badlo':'Naya chapter')+'</h2><input class="inp" type="text" id="tName" maxlength="40" placeholder="Chapter ka naam" value="'+esc(t.name)+'" aria-label="Naam"><input class="inp" type="number" inputmode="numeric" id="tTot" min="1" max="99" value="'+t.total+'" aria-label="Kitne lecture"><p class="sub" style="margin-top:6px">Kitne lecture hain?</p><button class="btn pri" data-act="saveTopic">Save karo</button>';
@@ -1224,6 +1251,7 @@ document.addEventListener('click',function(e){
  var el=e.target.closest('[data-act]');if(!el)return;
  var a=el.dataset.act,d=el.dataset;
  switch(a){
+  case 'specDay':{var sd=d.d;mutate(function(){S.specOff=S.specOff||{};if(S.specOff[sd])delete S.specOff[sd];else S.specOff[sd]=1},null);break}
   case 'tab':nav.tab=d.v;nav.stack=[];resetScroll=true;render();break;
   case 'back':{var cc=cur();if(cc&&cc.t==='doubt'&&ed&&ed.dirty){confirmSheet('Edit save nahi kiya. Bina save kiye peeche jao?','Haan, chhodo',function(){ed=null;nav.stack.pop();resetScroll=true;render()});break}nav.stack.pop();resetScroll=true;render();break}
   case 'openNP':np.loaded=false;np.selMode=false;np.sel={};go({t:'np'});npLoadNbs().then(function(){var c0=cur();if(c0&&c0.t==='np')render()});break;
@@ -1327,12 +1355,14 @@ document.addEventListener('click',function(e){
   case 'evDel':{var ed2=d.d,ei=d.id;mutate(function(){var L=evOf(ed2),x=L.filter(function(q){return q.id===ei})[0];if(!x)return;S.events[ed2]=L.filter(function(q){return q.id!==ei});if(x.h&&S.holidays[ed2]===x.n)delete S.holidays[ed2]},'Hat gaya');break}
   case 'pDay':openSheet({type:'pday',d:d.d});break;
   case 'pDelHol':{var ph=d.d;closeSheet();mutate(function(){delete S.holidays[ph]},'Chhutti hat gayi');break}
-  case 'gotoDay':viewDate=d.d;render();break;
+   case 'gotoDay':viewDate=d.d;render();break;
   case 'goToday':viewDate=today();render();break;
   case 'goDay':viewDate=d.d;nav.tab='aaj';nav.stack=[];resetScroll=true;render();break;
   case 'pick':openSheet({type:'pick'});break;
-  case 'quick':{var f=findTopic(d.id);if(!f)break;var n=nextUndone(f.t);if(!n){toast('Is chapter ke saare lecture ho gaye');break}tickKey(d.id+':'+n);break}
+  case 'quick':{var f=findTopic(d.id);if(!f)break;var n=nextUndoneG(f.t);if(!n){toast('Is chapter ke saare lecture ho gaye');break}tickKey(d.id+':'+n);break}
   case 'tog':tickKey(d.k);break;
+  case 'spec':{var si=+d.i,wasN=specN(viewDate);mutate(function(){S.spec=S.spec||{};var a=(S.spec[viewDate]||[0,0]).slice();a[si]=a[si]?0:1;S.spec[viewDate]=a});if(wasN<2&&specN(viewDate)===2){if(S.vibrate&&navigator.vibrate){try{navigator.vibrate(20)}catch(x){}}celebrate()}break}
+  case 'qtick':{var qs=S.subjects.filter(function(x){return x.id===d.id})[0],qk=null;if(qs)for(var qi=0;qi<qs.topics.length&&!qk;qi++){var qn=nextUndoneG(qs.topics[qi]);if(qn)qk=qs.topics[qi].id+':'+qn}if(qk)tickKey(qk);else toast('Is subject ke sab lecture ho gaye');break}
   case 'togSS':tickSS(d.k);break;
   case 'ssCountT':{var fc2=findTopic(d.id);if(!fc2)break;var tt=fc2.t;
    if(!tt.sc){mutate(function(){S.ssAuto=S.ssAuto||{};tt.sc=true;for(var n=1;n<=tt.total;n++){var kk=tt.id+':'+n;if(S.ss&&S.ss[kk]&&!S.done[kk]){S.done[kk]=S.ss[kk];S.ssAuto[kk]=S.ss[kk]}}},'Ab self study se bhi lecture complete hoga')}
@@ -1355,8 +1385,8 @@ document.addEventListener('click',function(e){
   case 'saveHol':{var dt=$('#hDate').value,why=$('#hWhy').value.trim();if(!dt){toast('Date chuno');break}if(!why){toast('Reason likhna zaroori hai');$('#hWhy').focus();break}
    sheet=null;$('#sheetWrap').innerHTML='';mutate(function(){S.holidays[dt]=why},fmt(dt)+' ki chhutti lag gayi');break}
   case 'delHol':{var dh=d.d;mutate(function(){delete S.holidays[dh]},'Chhutti hat gayi');break}
-  case 'resetDay':{var c=countOn(viewDate)+ssCount(viewDate);if(!c){toast('Is din koi tick nahi hai');break}
-   confirmSheet(fmtY(viewDate)+' ke '+c+' tick hata dun? Baaki din nahi chhuyenge.','Haan, reset karo',function(){mutate(function(){Object.keys(S.done).forEach(function(k){if(S.done[k]===viewDate)delete S.done[k]});Object.keys(S.ss||{}).forEach(function(k){if(S.ss[k]===viewDate)delete S.ss[k]})},'Is din ka reset ho gaya')});break}
+  case 'resetDay':{var c=countOn(viewDate)+ssCount(viewDate)+specN(viewDate);if(!c){toast('Is din koi tick nahi hai');break}
+   confirmSheet(fmtY(viewDate)+' ke '+c+' tick hata dun? Baaki din nahi chhuyenge.','Haan, reset karo',function(){mutate(function(){if(S.spec)delete S.spec[viewDate];Object.keys(S.done).forEach(function(k){if(S.done[k]===viewDate)delete S.done[k]});Object.keys(S.ss||{}).forEach(function(k){if(S.ss[k]===viewDate)delete S.ss[k]})},'Is din ka reset ho gaya')});break}
   case 'addTopic':openSheet({type:'topic',s:d.s});break;
   case 'editTopic':openSheet({type:'topic',id:d.id});break;
   case 'saveTopic':{var nm=$('#tName').value.trim(),tot=parseInt($('#tTot').value,10);

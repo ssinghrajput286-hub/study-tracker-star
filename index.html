@@ -1093,7 +1093,7 @@ function pcCal(){var td=today();if(!pmon)pmon=td.slice(0,7);
  for(i=0;i<off;i++)h+='<i></i>';
  for(i=1;i<=days;i++){ds=ymd(new Date(y,m,i));f=pcInfo(ds);
   h+='<button class="'+f.k+(ds===td?' td':'')+'" data-act="pDay" data-d="'+ds+'" aria-label="'+esc(fmtY(ds))+'">'+i+(f.e?'<em>'+f.e+'</em>':'')+'</button>'}
- h+='</div><div class="pc-lg"><span>\u2705 Poora</span><span>\ud83c\udf17 Adhura</span><span>\ud83d\udc94 Chhoota</span><span>\ud83c\udfd6\ufe0f Chhutti</span><span>\ud83e\ude94 Tyohaar</span></div>';
+ h+='</div><div class="pc-lg"><span>\u2705 Poora</span><span>\ud83c\udf17 Adhura</span><span>\ud83d\udc94 Chhoota</span><span>\ud83c\udfd6\ufe0f Chhutti</span><span>\ud83e\ude94 Tyohaar</span><span>\ud83d\udd01 Revision</span><span>\ud83d\udcdd Pending notes</span></div>';
  var ms=missedDays().reverse();
  if(ms.length){h+='<div class="pc-sec"><span>\ud83d\udcad Chhoote din</span><small>'+ms.length+'</small></div>';
   ms.slice(0,6).forEach(function(d){var p=S.target?Math.round(dayC(d)/S.target*100):0;h+='<button class="pc-row" data-act="pDay" data-d="'+d+'"><span class="ic">\ud83d\udc94</span><span class="t"><b>'+esc(fmtY(d).replace(/ \d{4}$/,''))+' \u00b7 '+p+'%</b><small>'+esc(S.missReason[d]||'Reason likho \u270d\ufe0f')+'</small></span><span class="go">\u203a</span></button>'});
@@ -1201,9 +1201,11 @@ function screenSet(){
  h+=tgl('confetti','🎉','Confetti','Target poora hone par');
  h+=tgl('cele','🏆','Shabaashi message','Target poora hone par popup');
  h+=tgl('vibrate','📳','Tick par vibration','Lecture tick karte waqt halka jhatka');
- h+='</div><div class="grp">Torch ka dil</div><div class="list">'+torchSet()+'</div><div class="grp">Data</div><div class="list">';
+ h+='</div><div class="grp">Torch ka dil</div><div class="list">'+torchSet()+'</div><div class="grp">Suraksha</div><div class="list">'+(S.pinH?nrow('pinSet','\ud83d\udd10','PIN badlo','App kholte waqt PIN poochta hai')+nrow('pinOff','\ud83d\udd13','PIN hatao','Lock band karo'):nrow('pinSet','\ud83d\udd10','App PIN lagao','Optional. App kholte waqt PIN poochega'))+'</div><div class="grp">Data</div><div class="list">';
  h+=nrow('dwr','🗓️','Poora din-wise report','Sab din ka PDF, ya sirf ek din ka');
  h+=nrow('bkp','💾','Backup aur Restore','Tools aur poora data file ya PDF me save karo, reset ke baad wapas lao'+(S.lastBackup?'. Aakhri backup: '+S.lastBackup:'. Abhi tak backup nahi liya'));
+ h+='<div class="srow"><span class="ico">\ud83d\udd04</span><span class="tx"><b>Auto backup</b><small>'+(window.AndroidBridge&&AndroidBridge.saveFile?'Apne aap Downloads/study tracker file saver folder me'+(S.autoBkLast?'. Aakhri: '+S.autoBkLast:''):'Sirf APK app me chalta hai')+'</small></span><button class="swt" role="switch" aria-checked="'+(S.autoBk!==false)+'" aria-label="Auto backup" data-act="abTog"></button></div>';
+ if(S.autoBk!==false)h+='<label class="srow"><span class="ico">\u23f1\ufe0f</span><span class="tx"><b>Kitne din me</b><small>Itne din baad naya backup banega</small></span><select class="sel" data-ch="abd" aria-label="Auto backup gap">'+[1,3,7,14].map(function(n){return '<option value="'+n+'"'+((S.autoBkD||7)===n?' selected':'')+'>'+n+' din</option>'}).join('')+'</select></label>'+nrow('abNow','\u25b6\ufe0f','Abhi auto backup lo','Turant ek backup file banao');
  h+='</div>';
  h+='<p class="sub" style="text-align:center;margin-top:16px">Data is phone me hi save hota hai ('+(mode==='window'?'window.storage':mode==='local'?'localStorage':'save nahi ho raha')+').</p>';
  return h}
@@ -1212,11 +1214,11 @@ function titleFor(){var c=cur();
  if(!c)return {aaj:'Study Tracker 📖',lec:'Lecture/Self study',plan:'Plan',tools:'Tools',set:'Settings'}[nav.tab];
  if(c.t==='subj'){var s=S.subjects.filter(function(x){return x.id===c.id})[0];return s?s.name:''}
  if(c.t==='topic'){var f=findTopic(c.id);return f?f.t.name:''}
- return c.t==='events'?'Event / Tyohaar':c.t==='missed'?'Chhoote hue din':c.t==='diary'?'Meri diary':c.t==='calc'?'Calculator':c.t==='tpls'?'Templates':c.t==='formulas'?'Formulas':c.t==='torch'?'Torch':c.t==='dwlist'?'Din-wise report':c.t==='rem'?'Study reminder':c.t==='doubts'?'Doubts':c.t==='doubt'?'Doubt':c.t==='np'?'Notepad':c.t==='nb'||c.t==='bk'?(np.nb?np.nb.name:'Notebook'):'Chhuttiyan'}
+ return c.t==='exm'?'Exam countdown':c.t==='foc'?'Focus timer':c.t==='wk'?'Weekly report':c.t==='rvl'?'Revision list':c.t==='events'?'Event / Tyohaar':c.t==='missed'?'Chhoote hue din':c.t==='diary'?'Meri diary':c.t==='calc'?'Calculator':c.t==='tpls'?'Templates':c.t==='formulas'?'Formulas':c.t==='torch'?'Torch':c.t==='dwlist'?'Din-wise report':c.t==='rem'?'Study reminder':c.t==='doubts'?'Doubts':c.t==='doubt'?'Doubt':c.t==='np'?'Notepad':c.t==='nb'||c.t==='bk'?(np.nb?np.nb.name:'Notebook'):'Chhuttiyan'}
 
 function render(){
  var old=$('#main'),sc=old?old.scrollTop:0,c=cur(),body;
- if(c){body=c.t==='subj'?screenSubj(c.id):c.t==='topic'?screenTopic(c.id):c.t==='missed'?screenMissed():c.t==='diary'?screenDiary():c.t==='calc'?screenCalc():c.t==='tpls'?screenTpls():c.t==='formulas'?screenFormulas():c.t==='torch'?screenTorch():c.t==='dwlist'?screenDwList():c.t==='events'?screenEvents():c.t==='rem'?screenRem():c.t==='doubts'?screenDoubts():c.t==='doubt'?screenDoubt(c.id):c.t==='np'?screenNP():c.t==='nb'?screenNB(c.id):c.t==='bk'?screenBook(c.id,c.i):screenHols()}
+ if(c){body=c.t==='subj'?screenSubj(c.id):c.t==='topic'?screenTopic(c.id):c.t==='missed'?screenMissed():c.t==='diary'?screenDiary():c.t==='calc'?screenCalc():c.t==='tpls'?screenTpls():c.t==='formulas'?screenFormulas():c.t==='torch'?screenTorch():c.t==='dwlist'?screenDwList():c.t==='exm'?screenExm():c.t==='foc'?screenFoc():c.t==='wk'?screenWk():c.t==='rvl'?screenRvl():c.t==='events'?screenEvents():c.t==='rem'?screenRem():c.t==='doubts'?screenDoubts():c.t==='doubt'?screenDoubt(c.id):c.t==='np'?screenNP():c.t==='nb'?screenNB(c.id):c.t==='bk'?screenBook(c.id,c.i):screenHols()}
  else body={aaj:screenAaj,lec:screenLec,plan:screenPlan,tools:screenTools,set:screenSet}[nav.tab]();
  c=cur();
  var top='<header class="top">'+(c?'<button class="ib" data-act="back" aria-label="Peeche">‹</button>':'')+'<h1>'+esc(titleFor())+'</h1>'+(!c&&nav.tab==='aaj'?'<button class="ib" data-act="share" aria-label="PDF report share karo">📤</button>':'')+'<button class="ib" id="undoBtn" data-act="undo" aria-label="Wapas">↩</button></header>';
@@ -1284,6 +1286,8 @@ function sheetBody(){var h,k,f,v;
  if(sheet.type==='rep')return '<h2>🗓️ Din-wise report</h2><p class="sub">PDF banega, share menu se save ya bhej sakte ho.</p><button class="btn pri" data-act="repAll">📚 Poora report (sab din)</button><button class="btn ghost" data-act="dwList">👁️ Din-wise list dekho</button><p class="sub" style="margin-top:14px">Ya sirf ek din ka:</p><input class="inp" type="date" id="rDate" value="'+sheet.d+'" aria-label="Date chuno"><button class="btn ghost" data-act="repOne">📅 Sirf ek din ka report</button><button class="btn txt" data-act="closeSheet">Band karo</button>';
  if(sheet.type.slice(0,2)==='np'||sheet.type==='cSteps')return npSheet();
  if(sheet.type==='bkp'||sheet.type==='bkr')return bkSheet();
+ if(sheet.type==='pinSet')return pinSheet();
+ if(sheet.type==='prv')return '<h2>\ud83d\udd12 Private</h2><p class="sub" style="margin:6px 0 12px">App se bahar jaate hi ye band ho jata hai.</p><button class="btn pri" data-act="prvGo" data-m="web">\ud83c\udf10 Browser (search)</button><button class="btn pri" style="margin-top:8px" data-act="prvGo" data-m="tg">\u2708\ufe0f Telegram Web</button><button class="btn txt" data-act="closeSheet">Band karo</button>';
  if(sheet.type==='remNoWv')return '<h2>📲 Phone alarm</h2><p class="sub" style="margin:8px 0 12px">Ye app (APK) phone ki Clock app ko seedha nahi khol sakti. Clock app me <b>'+esc(rem12(sheet.t))+'</b> ka alarm ek baar khud lagao (naam: '+esc(sheet.label||'Study time')+').</p><p class="sub">Ya mujhse (Claude se) bolo, main phone me alarm laga dunga.</p><button class="btn pri" data-act="closeSheet">Theek hai</button>';
  if(sheet.type==='remRing')return '<h2>⏰ Padhne ka time!</h2><p class="sub" style="margin:6px 0 14px">'+esc(sheet.label||'')+' ('+esc(sheet.t)+')</p><button class="btn pri" data-act="closeSheet">Theek hai, padhne baithta hoon</button>';
  if(sheet.type==='remEdit'){h='<h2>'+(sheet.id?'Reminder badlo':'Naya reminder')+'</h2>'+remTimeUI()+'<p class="sub" style="margin-top:12px">Naam (chuno ya likho)</p><div class="dtools" style="margin-top:6px">'+['Padhai ka time','Revision','Mock test','Notes','Doubts'].map(function(l){return '<button class="dt wide" style="width:auto;padding:0 12px;font-size:13px" data-act="remLbl" data-v="'+l+'">'+l+'</button>'}).join('')+'</div><input class="inp" type="text" id="rmL" maxlength="40" value="'+esc(sheet.label)+'" placeholder="Naam (jaise Maths padhna)" aria-label="Naam" enterkeyhint="done"><p class="sub" style="margin-top:10px">Kin dino par?</p><div class="dtools">';
@@ -1498,6 +1502,10 @@ document.addEventListener('click',function(e){
   case 'openTpls':go({t:'tpls'});break;
   case 'setTpl':{var nm=(TPLX.filter(function(x){return x[0]===d.v})[0]||[])[1];mutate(function(){S.tpl=d.v});applyTheme();render();toast('Template badal gaya: '+nm+' ✓');break}
   case 'bkp':openSheet({type:'bkp',sel:{main:true,notes:true,doubts:true}});break;
+  case 'pinSet':openSheet({type:'pinSet',off:false});break;
+  case 'pinOff':openSheet({type:'pinSet',off:true});break;
+  case 'pinSave':pinSave();break;
+  case 'prvGo':prvGo(d.m);break;
   case 'bkTog':if(sheet&&sheet.sel){if(d.v==='all'){var on=!(sheet.sel.main&&sheet.sel.notes&&sheet.sel.doubts);sheet.sel={main:on,notes:on,doubts:on}}else sheet.sel[d.v]=!sheet.sel[d.v];drawSheet()}break;
   case 'bkFile':bkSave('json');break;
   case 'bkPdf':bkSave('pdf');break;
@@ -1505,6 +1513,21 @@ document.addEventListener('click',function(e){
   case 'bkGo':bkRestore();break;
   case 'openTorch':go({t:'torch'});break;
   case 'openRem':go({t:'rem'});break;
+  case 'openExm':go({t:'exm'});break;
+  case 'openFoc':go({t:'foc'});break;
+  case 'exmAdd':{var exn=($('#exN')||{}).value||'',exd=($('#exD')||{}).value||'';exn=exn.trim();if(!exn){toast('Exam ka naam likho');break}if(!exd){toast('Date chuno');break}mutate(function(){S.exams=S.exams||[];S.exams.push({id:nid('x'),name:exn,date:exd})},'Exam jud gaya');break}
+  case 'exmDel':{var exi=d.id;confirmSheet('Ye exam hata dun?','Haan, hatao',function(){mutate(function(){S.exams=(S.exams||[]).filter(function(x){return x.id!==exi})},null)});break}
+  case 'focDur':if(!foc.run){foc.dur=+d.v;foc.left=foc.dur*60;render()}break;
+  case 'focStart':focStart();break;
+  case 'focPause':focPause();break;
+  case 'focReset':focReset();break;
+  case 'openWk':wkOff=0;go({t:'wk'});break;
+  case 'openRvl':go({t:'rvl'});break;
+  case 'wkPrev':wkOff--;render();break;
+  case 'wkNext':if(wkOff<0){wkOff++;render()}break;
+  case 'rvlDone':{var rvlk=d.k;mutate(function(){S.rvDone=S.rvDone||{};S.rvDone[rvlk]=today()},'Revision ho gaya \u2713');break}
+  case 'abTog':mutate(function(){S.autoBk=S.autoBk===false?true:false},null);break;
+  case 'abNow':abRun(true).then(function(){if(window.AndroidBridge&&AndroidBridge.saveFile)toast('Auto backup ban gaya')});break;
   case 'remNew':openSheet({type:'remEdit',id:'',t:'06:00',days:[0,1,2,3,4,5,6],label:'Padhai ka time'});break;
   case 'remEdit':{var re0=S.rem.filter(function(x){return x.id===d.id})[0];if(re0)openSheet({type:'remEdit',id:re0.id,t:re0.t,days:re0.days.slice(),label:re0.label});break}
   case 'remDay':{var dv0=+d.v,ix=sheet.days.indexOf(dv0);if(ix>=0)sheet.days.splice(ix,1);else sheet.days.push(dv0);$('[data-act=remDay][data-v="'+dv0+'"]').classList.toggle('on',ix<0);break}
@@ -1554,6 +1577,7 @@ document.addEventListener('change',function(e){var t=e.target;if(!t.dataset)retu
  else if(t.dataset.ch==='start'&&t.value){mutate(function(){S.start=t.value})}
  else if(t.dataset.ch==='tOff'||t.dataset.ch==='tOn'){var tk=t.dataset.ch==='tOff'?'torchOff':'torchOn',tv=t.value.trim()||defaultState()[tk];mutate(function(){S[tk]=tv})}
  else if(t.dataset.ch==='pnwd'||t.dataset.ch==='revwd'){var wv2=parseInt(t.value,10),wk=t.dataset.ch==='pnwd'?'pnWd':'revWd';mutate(function(){S[wk]=wv2})}
+  else if(t.dataset.ch==='abd'){var abv=parseInt(t.value,10);mutate(function(){S.autoBkD=abv})}
   else if(t.dataset.ch==='weekoff'){var wv=parseInt(t.value,10);mutate(function(){S.weekOff=wv})}});
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.closest&&t.closest('#sheetWrap')&&(t.tagName==='TEXTAREA'||(t.tagName==='INPUT'&&/^(text|search|number)$/.test(t.type)))){if(document.activeElement!==t)t.focus();try{if(window.AndroidBridge&&AndroidBridge.showKeyboard)AndroidBridge.showKeyboard()}catch(x){}}},true);
 document.addEventListener('touchend',function(e){var t=e.target;if(t&&t.closest&&t.closest('#sheetWrap')&&(t.tagName==='TEXTAREA'||(t.tagName==='INPUT'&&/^(text|search|number)$/.test(t.type)))&&document.activeElement!==t)t.focus()},true);
@@ -1657,6 +1681,99 @@ function allRows(){
   if(S.dayNotes[d])R.push({k:'t',s:'Note: '+S.dayNotes[d].replace(/\s+/g,' '),size:9,c:'#8C88A8',x:14})}
  return R}
 
+/* ---------- auto backup, weekly report, revision list ---------- */
+var abBusy=false;
+async function abRun(force){if(abBusy)return;try{
+ if(!S||!window.AndroidBridge||!AndroidBridge.saveFile){if(force)toast('Auto backup sirf APK me chalta hai');return}
+ if(!force&&S.autoBk===false)return;
+ var iv=S.autoBkD||7,last=S.autoBkLast||'';if(!force&&last&&diffDays(today(),last)<iv)return;
+ abBusy=true;var sel={main:true,notes:true,doubts:true},o=await bkBuild(sel),js=JSON.stringify(o);
+ if(js.length>24e6){sel.doubts=false;o=await bkBuild(sel);js=JSON.stringify(o)}
+ if(js.length>24e6){sel.notes=false;o=await bkBuild(sel);js=JSON.stringify(o)}
+ await nativeSave(new File([js],'study-tracker-auto-backup-'+today()+'.json',{type:'application/json'}));
+ S.autoBkLast=today();S.lastBackup=today();save();render()}catch(e){if(force)toast('Auto backup nahi ban paya')}abBusy=false}
+var wkOff=0,WKL=['Som','Man','Bud','Gur','Shu','San','Rav'];
+function wkStart(){var dw=(new Date().getDay()+6)%7;return addDays(today(),-dw+7*wkOff)}
+function screenWk(){var st=wkStart(),en=addDays(st,6),td=today(),days=[],i,plan=0,done=0,ss=0,mxc=Math.max(S.target,1),bestD=null,miss=[],subj={};
+ for(i=0;i<7;i++){var d=addDays(st,i),c=countOn(d),pl=(d>=S.start&&!noLec(d))?S.target:0,sn=ssOnly(d);days.push({d:d,c:c,pl:pl,sn:sn});plan+=pl;done+=c;ss+=sn;if(c>mxc)mxc=c;if(c>0&&(!bestD||c>bestD.c))bestD={d:d,c:c};if(pl&&c===0&&d<td)miss.push(d)}
+ Object.keys(S.done).forEach(function(k){var v=S.done[k];if(v==='pre'||v<st||v>en)return;var f=findTopic(k.split(':')[0]);if(f)subj[f.s.id]=(subj[f.s.id]||0)+1});
+ var pct=plan?Math.min(100,Math.round(done/plan*100)):0,h='<div class="pc-h"><button data-act="wkPrev" aria-label="Pichla hafta">‹</button><b>'+esc(fmt(st)+' – '+fmt(en))+(wkOff===0?'<br><small style="font-weight:600;color:var(--mut)">Is hafte</small>':'')+'</b><button data-act="wkNext" aria-label="Agla hafta"'+(wkOff>=0?' disabled style="opacity:.35"':'')+'>›</button></div>';
+ h+='<div class="card"><b style="font-size:26px">'+done+(plan?' / '+plan:'')+'</b> <span style="color:var(--mut)">lecture</span><span class="bar"><i style="width:'+pct+'%"></i></span><p class="sub" style="margin:8px 0 0">'+(plan?pct+'% poora':'Is hafte koi target din nahi')+' · Self study: '+ss+(function(){var f=0,q;for(q=0;q<7;q++)f+=focMin(addDays(st,q));return f?' · Focus: '+f+' min':''})()+'</p></div>';
+ h+='<div class="card"><b>Din-wise</b><div style="display:flex;gap:6px;align-items:flex-end;height:120px;margin-top:12px">'+days.map(function(x,ix){var hh=x.c?Math.max(10,Math.round(x.c/mxc*88)):4,sp=(isWE(x.d)&&!isHol(x.d))?(specName(x.d)==='Revision'?'🔁':'📝'):isHol(x.d)?'🏖️':'';return '<div style="flex:1;text-align:center;min-width:0"><small style="display:block;height:16px">'+(x.c||'')+'</small><div style="height:'+hh+'px;background:'+(x.d===td?'var(--p)':'var(--pt)')+';border-radius:8px 8px 3px 3px;'+(x.c?'':'opacity:.6')+'"></div><small style="display:block;margin-top:4px;color:var(--mut)">'+WKL[ix]+'</small><small style="display:block;height:16px">'+sp+'</small></div>'}).join('')+'</div></div>';
+ h+='<div class="card"><div class="dwtot" style="margin:0 0 8px"><small>Sabse acha din</small><b>'+(bestD?esc(fmt(bestD.d,true))+' · '+bestD.c+' lecture':'Abhi koi nahi')+'</b></div><div class="dwtot" style="margin:0"><small>Chhoote din (target tha, 0 hua)</small><b>'+(miss.length?miss.map(function(x){return esc(fmt(x))}).join(', '):'Koi nahi 🎉')+'</b></div></div>';
+ var ks=Object.keys(subj);h+='<div class="card"><b>Subject-wise lecture</b>';
+ if(!ks.length)h+='<p class="sub" style="margin:8px 0 0">Is hafte abhi koi lecture tick nahi hua.</p>';
+ S.subjects.forEach(function(sj){if(!subj[sj.id])return;h+='<div style="margin-top:10px;display:flex;justify-content:space-between"><span>'+esc(sj.emoji+' '+sj.name)+'</span><b>'+subj[sj.id]+'</b></div><span class="bar" style="--c:'+sj.color+'"><i style="width:'+Math.round(subj[sj.id]/Math.max(done,1)*100)+'%"></i></span>'});
+ return h+'</div>'}
+var RVS=[1,3,7,15];
+function rvItems(){var td=today(),g={};S.rvDone=S.rvDone||{};
+ Object.keys(S.done).forEach(function(k){var v=S.done[k];if(!v||v==='pre'||!/^\d{4}-/.test(v))return;var p=k.split(':'),f=findTopic(p[0]);if(!f)return;
+  var n=0;RVS.forEach(function(x){if(addDays(v,x)<=td)n=x});if(!n)return;var late=diffDays(td,addDays(v,n));if(late>20)return;var key=p[0]+'@'+v+'@'+n;if(S.rvDone[key])return;var o=g[key]=g[key]||{key:key,f:f,n:n,late:late,ns:[]};o.ns.push(+p[1])});
+ return Object.keys(g).map(function(k){return g[k]}).sort(function(a,b){return b.late-a.late})}
+function screenRvl(){var it=rvItems(),h='<p class="sub" style="margin:0 2px 12px">Jo lecture tick kiya, wo 1, 3, 7 aur 15 din baad yahan dohrane ke liye aata hai. Dohra lo to ✓ dabao.</p>';
+ if(!it.length)return h+'<div class="empty">Abhi koi revision baaki nahi 🎉</div>';
+ it.forEach(function(x){h+='<div class="item" style="--c:'+x.f.s.color+'"><span class="dot"></span><span class="t"><b>'+esc(x.f.t.name)+'</b><small>Lecture '+x.ns.sort(function(a,b){return a-b}).join(', ')+' · '+x.n+' din wala revision'+(x.late>0?' · '+x.late+' din late':' · aaj')+'</small></span><button class="ib" style="box-shadow:none" data-act="rvlDone" data-k="'+esc(x.key)+'" aria-label="Revision ho gaya">✓</button></div>'});
+ return h}
+/* ---------- exam countdown aur focus timer ---------- */
+function exmWork(a,b){var n=0,d=a;while(d<=b&&n<800){if(d>=S.start&&!noLec(d))n++;d=addDays(d,1)}return n}
+function exmList(){var td=today();return (S.exams||[]).slice().sort(function(x,y){return x.date<y.date?-1:1}).filter(function(x){return x.date>=td})}
+function exmNext(){var l=exmList();return l.length?l[0]:null}
+function screenExm(){var td=today(),l=exmList(),old=(S.exams||[]).filter(function(x){return x.date<td}),left=totals().left,h='';
+ if(!l.length)h+='<div class="empty">Abhi koi exam nahi jura. Neeche naam aur date daalo.</div>';
+ l.forEach(function(x,ix){var dl=diffDays(x.date,td),wd=exmWork(td,addDays(x.date,-1)),per=wd>0?Math.ceil(left/wd*10)/10:0;
+  h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div><b style="font-size:18px">'+esc(x.name)+'</b><br><small style="color:var(--mut)">'+esc(fmtY(x.date))+'</small></div><button class="ib" style="box-shadow:none" data-act="exmDel" data-id="'+esc(x.id)+'" aria-label="Hatao">🗑</button></div>';
+  h+='<div style="font-size:34px;font-weight:800;margin:8px 0 2px;color:var(--p)">'+(dl===0?'Aaj hai!':dl+' din bache')+'</div>';
+  if(ix===0||true)h+='<p class="sub" style="margin:0">'+(dl===0?'Best of luck 🍀':left<=0?'Saare lecture poore ho chuke 🎉':wd>0?'Lecture baaki: '+left+'. Padhai ke '+wd+' din bache, to roz lagbhag '+per+' lecture karne honge.':'Exam se pehle padhai ka koi din nahi bacha. Lecture baaki: '+left)+'</p></div>'});
+ h+='<div class="card"><b>Naya exam</b><input class="inp" id="exN" type="text" maxlength="40" placeholder="Exam ka naam" aria-label="Exam ka naam"><input class="inp" id="exD" type="date" aria-label="Exam ki date" value="'+addDays(td,30)+'"><button class="btn pri" style="margin-top:12px" data-act="exmAdd">＋ Exam jodo</button></div>';
+ if(old.length)h+='<p class="sub" style="text-align:center">Nikal chuke exam: '+old.map(function(x){return esc(x.name)}).join(', ')+'</p>';
+ return h}
+var foc={dur:25,run:false,end:0,left:25*60,t:null};
+function focFmt(sec){sec=Math.max(0,Math.round(sec));return ('0'+Math.floor(sec/60)).slice(-2)+':'+('0'+sec%60).slice(-2)}
+function focMin(d){return (S.focus&&S.focus[d])||0}
+function focLog(m){if(m<=0)return;S.focus=S.focus||{};S.focus[today()]=(S.focus[today()]||0)+m;save()}
+function focTick(){if(!foc.run)return;var l=(foc.end-Date.now())/1000;if(l<=0){foc.run=false;foc.left=foc.dur*60;focLog(foc.dur);clearInterval(foc.t);foc.t=null;if(navigator.vibrate)try{navigator.vibrate([400,200,400,200,400])}catch(e){}remBeep();toast('⏱️ '+foc.dur+' min poore ho gaye. Shabaash!');render();return}
+ foc.left=l;var e=$('#focT');if(e)e.textContent=focFmt(l);var pb=$('#focB');if(pb)pb.style.width=Math.round((1-l/(foc.dur*60))*100)+'%'}
+function focStart(){if(foc.run)return;foc.end=Date.now()+foc.left*1000;foc.run=true;if(foc.t)clearInterval(foc.t);foc.t=setInterval(focTick,500);render()}
+function focPause(){if(!foc.run)return;focTick();foc.run=false;clearInterval(foc.t);foc.t=null;render()}
+function focReset(){var done=Math.floor((foc.dur*60-foc.left)/60);if(foc.run){foc.run=false;clearInterval(foc.t);foc.t=null}if(done>=1){focLog(done);toast(done+' min focus ginte gaye')}foc.left=foc.dur*60;render()}
+function screenFoc(){var td=today(),wk=0,i;for(i=0;i<7;i++)wk+=focMin(addDays(td,-i));
+ var h='<div class="hero" style="text-align:center;display:block"><div style="font-size:64px;font-weight:800;letter-spacing:2px" id="focT">'+focFmt(foc.run?(foc.end-Date.now())/1000:foc.left)+'</div><span class="bar" style="background:rgba(255,255,255,.3)"><i id="focB" style="width:'+Math.round((1-foc.left/(foc.dur*60))*100)+'%;background:#fff"></i></span></div>';
+ h+='<div class="dtools" style="margin:12px 0;display:flex;gap:8px;flex-wrap:wrap;justify-content:center">'+[15,25,45,60,90].map(function(m){return '<button class="chp'+(foc.dur===m?' on':'')+'" data-act="focDur" data-v="'+m+'"'+(foc.run?' disabled':'')+'>'+m+' min</button>'}).join('')+'</div>';
+ h+='<div class="row2">'+(foc.run?'<button class="btn ghost" data-act="focPause">⏸ Roko</button>':'<button class="btn pri" data-act="focStart">▶ '+(foc.left<foc.dur*60?'Aage chalo':'Shuru karo')+'</button>')+'<button class="btn ghost" data-act="focReset">↺ Reset</button></div>';
+ h+='<div class="card" style="margin-top:14px"><div class="dwtot" style="margin:0 0 8px"><small>Aaj ka focus</small><b>'+focMin(td)+' min</b></div><div class="dwtot" style="margin:0"><small>Pichhle 7 din</small><b>'+wk+' min</b></div></div><p class="sub" style="text-align:center">Timer chalte waqt app khula rakho. Poora hone par ghanti bajegi aur vibrate hoga.</p>';
+ return h}
+/* ---------- app PIN lock aur private space ---------- */
+function pinHash(p){var h1=5381,h2=52711,t='stk★'+p+'★'+p.length,i;for(i=0;i<t.length;i++){var c=t.charCodeAt(i);h1=(((h1<<5)+h1)^c)|0;h2=(((h2<<5)+h2)^c)|0}for(i=0;i<5000;i++){h1=((h1<<5)+h1+h2)|0;h2=(((h2<<5)+h2)^h1)|0}return (h1>>>0).toString(36)+(h2>>>0).toString(36)}
+var lockEntry='',lockAt=0;
+function lockShow(){if(!S||!S.pinH)return;var el=$('#lockO');if(!el){el=document.createElement('div');el.id='lockO';document.body.appendChild(el)}
+ el.style.cssText='position:fixed;inset:0;z-index:9999;background:var(--bg,#FFF8E1);color:var(--tx,#222);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:14px';lockEntry='';lockDraw('')}
+function lockDraw(msg){var el=$('#lockO');if(!el)return;var n=S.pinLen||4,dots='',i,k='';
+ for(i=0;i<n;i++)dots+='<span style="width:14px;height:14px;border-radius:50%;display:inline-block;margin:0 5px;background:'+(i<lockEntry.length?'var(--p,#6F55F5)':'var(--line,#ddd)')+'"></span>';
+ ['1','2','3','4','5','6','7','8','9','','0','⌫'].forEach(function(x){k+=x===''?'<span></span>':'<button data-pk="'+x+'" style="height:60px;border-radius:18px;background:var(--card,#fff);box-shadow:var(--sh);font-size:22px;font-weight:700;color:var(--tx,#222)">'+x+'</button>'});
+ el.innerHTML='<div style="font-size:22px;font-weight:800">Study Tracker ★</div><div style="color:var(--mut,#777)">PIN daalo</div><div>'+dots+'</div><div style="display:grid;grid-template-columns:repeat(3,76px);gap:12px">'+k+'</div>'+(S.pinHint?'<button data-pk="hint" style="color:var(--p,#6F55F5);font-weight:600;padding:8px">Hint dikhao</button>':'')+'<div style="min-height:22px;color:#E5484D;text-align:center">'+esc(msg||'')+'</div>'}
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-pk]');if(!b||!S)return;var v=b.dataset.pk;
+ if(v==='hint'){lockDraw('Hint: '+(S.pinHint||''));return}
+ if(v==='⌫'){lockEntry=lockEntry.slice(0,-1);lockDraw('');return}
+ if(lockEntry.length>=6)return;lockEntry+=v;
+ if(lockEntry.length>=(S.pinLen||4)){if(pinHash(lockEntry)===S.pinH){var el=$('#lockO');if(el)el.remove();lockEntry=''}else{lockEntry='';lockDraw('Galat PIN, dobara try karo');if(navigator.vibrate)navigator.vibrate(80)}}else lockDraw('')});
+document.addEventListener('visibilitychange',function(){if(document.hidden)lockAt=Date.now();else if(S&&S.pinH&&lockAt&&Date.now()-lockAt>20000)lockShow()});
+function pinSheet(){var h='<h2>🔐 '+(sheet.off?'PIN hatao':S.pinH?'PIN badlo':'App PIN lagao')+'</h2><p class="sub" style="margin:6px 0 4px">'+(sheet.off?'Abhi wala PIN daalo.':'4 se 6 number ka PIN rakho. Ye optional hai. Bhool gaye to hint kaam aayega, isliye hint zaroor likho.')+'</p>';
+ if(S.pinH)h+='<input class="inp" id="pnOld" type="password" inputmode="numeric" maxlength="6" placeholder="Abhi wala PIN" autocomplete="off">';
+ if(!sheet.off)h+='<input class="inp" id="pnNew" type="password" inputmode="numeric" maxlength="6" placeholder="Naya PIN (4-6 number)" autocomplete="off"><input class="inp" id="pnNew2" type="password" inputmode="numeric" maxlength="6" placeholder="Naya PIN dobara" autocomplete="off"><input class="inp" id="pnHint" type="text" maxlength="40" placeholder="Hint (PIN nahi, bas yaad dilane ke liye)" value="'+esc(S.pinHint||'')+'">';
+ return h+'<button class="btn pri" style="margin-top:12px" data-act="pinSave">'+(sheet.off?'PIN hatao':'Save karo')+'</button><button class="btn txt" data-act="closeSheet">Raho</button>'}
+function pinSave(){var o=($('#pnOld')||{}).value||'',n=($('#pnNew')||{}).value||'',n2=($('#pnNew2')||{}).value||'',hn=(($('#pnHint')||{}).value||'').trim();
+ if(S.pinH&&pinHash(o)!==S.pinH){toast('Abhi wala PIN galat hai');return}
+ if(sheet.off){closeSheet();mutate(function(){delete S.pinH;delete S.pinLen;delete S.pinHint},'PIN hat gaya');return}
+ if(!/^\d{4,6}$/.test(n)){toast('PIN 4 se 6 number ka hona chahiye');return}
+ if(n!==n2){toast('Dono PIN same nahi hain');return}
+ if(!hn){toast('Hint likho, bhool gaye to kaam aayega');return}
+ if(hn.indexOf(n)>-1){toast('Hint me PIN mat likho');return}
+ closeSheet();mutate(function(){S.pinH=pinHash(n);S.pinLen=n.length;S.pinHint=hn},'PIN lag gaya 🔐')}
+function prvCode(x){var t=String(x||'').replace(/\s/g,'').replace(/-/g,'−');return t==='99188+36319'||t==='99188+36310'||t==='99188−36310'}
+function prvOpen(){openSheet({type:'prv'})}
+function prvGo(m){closeSheet();calc.expr='';calc.last='';calc.res='';calc.fin=false;calc.pos=null;
+ if(window.AndroidBridge&&AndroidBridge.openPrivate)AndroidBridge.openPrivate(m);else if(window.AndroidBridge)toast('Is APK me Private screen nahi hai. GitHub me naya project.zip upload karke dobara build karo');else window.open(m==='tg'?'https://web.telegram.org/k/':'https://duckduckgo.com/','_blank');
+ render()}
 /* ---------- backup aur restore ---------- */
 var BKP={main:['📚','Lectures, progress, notes, settings','Subjects, ticks, diary, chhutti, rang, torch text'],notes:['📓','Tools: Notepad','Saari notebooks aur unke pages'],doubts:['📸','Tools: Doubts','Saare doubt photos aur notes']};
 function bkSheet(){var h,k,sel=sheet.sel;
@@ -1813,7 +1930,7 @@ function calcEval1(src){
   log:function(a){var l=ln(a);return [l[0]/Math.LN10,l[1]/Math.LN10]},ln:ln,
   abs:function(a){return re(Math.hypot(a[0],a[1]))},
   '√':function(a){var r=Math.hypot(a[0],a[1]);return [Math.sqrt(Math.max(0,(r+a[0])/2)),(a[1]<0?-1:1)*Math.sqrt(Math.max(0,(r-a[0])/2))]}};
- function ch(){var v=po();while(i<s.length&&/^(x|θ|φ|π)/.test(s.slice(i)))v=mul(v,po());return v}
+ function ch(){var ng=false;if(s[i]==='−'){i++;ng=true}var v=po();while(i<s.length&&/^(x|θ|φ|π)/.test(s.slice(i)))v=mul(v,po());return ng?sub(re(0),v):v}
  function sp(){var r=s.slice(i);return /^[0-9.(]/.test(r)||NAME.test(r)}
  function ex(){var v=tm();while(s[i]==='+'||s[i]==='−'){var c=s[i++],t=tm(),p0=v;v=c==='+'?add(v,t):sub(v,t);St(p0,c,t,v)}return v}
  function tm(){var v=un();for(;;){var p1=v,u1;if(s[i]==='×'){i++;u1=un();v=mul(v,u1);St(p1,'×',u1,v)}else if(s[i]==='÷'){i++;u1=un();v=dv(v,u1);St(p1,'÷',u1,v)}else if(i<s.length&&sp()){u1=un();v=mul(v,u1);St(p1,'×',u1,v)}else break}return v}
@@ -1846,10 +1963,12 @@ function parse(src){
  var o=0,q;for(q=0;q<s.length;q++){if(s[q]==='(')o++;else if(s[q]===')')o--}while(o-->0)s+=')';
  function ex(){var v=tm();while(s[i]==='+'||s[i]==='-'){var c=s[i++],t=tm();v=c==='+'?add(v,t):add(v,neg(t))}return v}
  function tm(){var v=un();for(;;){if(s[i]==='*'){i++;v=mul(v,un())}else if(s[i]==='/'){i++;v=dvd(v,un())}else if(i<s.length&&/^[0-9.(]/.test(s.slice(i))||NM.test(s.slice(i)))v=mul(v,un());else break}return v}
+ function isA(r){return !/^(sin⁻¹|cos⁻¹|tan⁻¹|cosec|sin|cos|tan|cot|sec|log|ln|abs|√)/.test(r)&&/^[0-9.(πθφxtavphe]/.test(r)}
+ function an(){var ng=false;if(s[i]==='-'){i++;ng=true}var b=at();if(s[i]==='^'){i++;b=pw(b,un())}while(i<s.length&&isA(s.slice(i))){var c=at();if(s[i]==='^'){i++;c=pw(c,un())}b=mul(b,c)}return ng?neg(b):b}
  function un(){if(s[i]==='-'){i++;return neg(un())}if(s[i]==='+'){i++;return un()}var b=at();if(s[i]==='^'){i++;return pw(b,un())}return b}
  function at(){var r=s.slice(i),m;if(s[i]==='('){i++;var v=ex();if(s[i]!==')')throw 0;i++;return v}
   if((m=r.match(/^(\d+\.?\d*|\.\d+)/))){i+=m[0].length;return N(parseFloat(m[0]))}
-  if((m=r.match(NM))){i+=m[0].length;var n=m[0];if(n.length>1&&n!=='π'&&n!=='θ'||n==='√'){var a;if(s[i]==='('){i++;a=ex();if(s[i]!==')')throw 0;i++}else a=at();return fn(n,a)}return V(n)}
+  if((m=r.match(NM))){i+=m[0].length;var n=m[0];if(n.length>1&&n!=='π'&&n!=='θ'||n==='√'){var a;if(s[i]==='('){i++;a=ex();if(s[i]!==')')throw 0;i++}else a=/^(sin|cos|tan|cot|sec|cosec|sin⁻¹|cos⁻¹|tan⁻¹)$/.test(n)?an():at();return fn(n,a)}return V(n)}
   throw 0}
  var v=ex();if(i<s.length)throw 0;return v}
 function D(n,x){var k=n[0],u,w;
@@ -1954,7 +2073,7 @@ function calcKey(v){
  if(v==='C'||v==='=')calc.pos=null;
  if(v==='C'){calc.expr='';calc.fin=false;calc.res='';calc.last=''}
  else if(v==='⌫'){if(calc.fin){calc.expr='';calc.fin=false;calc.res=''}else calc.expr=calcToks(calc.expr).slice(0,-1).join('');calc.res=''}
- else if(v==='='){var cc=calcCal(calc.expr),r=cc?cc.r:calcEval(calc.expr);if(cc){calc.why=cc.why;calc.steps=['Rule: sum, product, chain, power aur linear-argument rules lage','Calculus radian me hota hai'];if(!isNaN(+r))calc.lastV=[+r,0]}if(r===null){calc.res='Error';calc.last=calc.why}else{calc.last=calc.expr+' = '+r;calc.ansV=calc.lastV;calc.res=r;calc.fin=true}}
+ else if(v==='='){if(prvCode(calc.expr))setTimeout(prvOpen,150);var cc=calcCal(calc.expr),r=cc?cc.r:calcEval(calc.expr);if(cc){calc.why=cc.why;calc.steps=['Rule: sum, product, chain, power aur linear-argument rules lage','Calculus radian me hota hai'];if(!isNaN(+r))calc.lastV=[+r,0]}if(r===null){calc.res='Error';calc.last=calc.why}else{calc.last=calc.expr+' = '+r;calc.ansV=calc.lastV;calc.res=r;calc.fin=true}}
  else{if(calc.fin){calc.expr=OPS.indexOf(v)>-1?'Ans':'';calc.fin=false}calc.expr+=v;calc.res='';var pv=calcEval(calc.expr);if(pv!==null&&/[+−×÷^%!(]/.test(calc.expr))calc.res=pv}
  updCalc()}
 function screenCalc(){
@@ -1996,7 +2115,7 @@ function torchSet(){
 function screenTorch(){
  return '<div class="tscr"><button class="heart'+(torch.on?' on':'')+'" id="hbtn" style="--hc:'+esc(S.torchColor)+'" data-act="torch" aria-pressed="'+torch.on+'" aria-label="Torch on ya off karne ke liye dil ko chhuo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 2.7 4.5 6.3 4.2c2-.2 3.9.9 5.7 3 1.8-2.1 3.7-3.2 5.7-3 3.6.3 5.4 4.2 3.9 7.6C19.5 16.4 12 21 12 21z"/></svg></button><p class="tcap" id="tcap">'+esc(torch.on?S.torchOn:S.torchOff)+'</p><button class="btn ghost" data-act="screenLight">🖥 Screen light (torch na chale to)</button></div>'}
 function tool(a,e,t,d,c){return '<button class="item" style="--c:'+c+'" data-act="'+a+'"><span class="dot"></span><span class="t"><b>'+e+' '+t+'</b><small>'+d+'</small></span><span class="go">›</span></button>'}
-function screenTools(){return tool('openFormulas','📐','Formulas','Algebra, trig, inverse trig, calculus. Class 8 se degree tak','#12C2A5')+tool('openNP','📓','Notepad','Diary, paper notes, study notes aur planner. Likho, draw karo, photo lagao','#D6336F')+tool('openDoubts','📸','Doubts','Jo question na aaye uska photo ya screenshot save karo, edit karke share karo','#2F6FEB')+tool('openRem','⏰','Study reminder','Time par ghanti, countdown aur phone ka alarm','#8D52EA')+tool('openTorch','🔦','Torch','Dil ko chhuo, torch on ya off','#FF4D8D')+tool('openTpls','🎨','Templates','App ka poora design badlo. Data aur tools wahi rahenge','#6F55F5')}
+function screenTools(){return tool('openFormulas','📐','Formulas','Algebra, trig, inverse trig, calculus. Class 8 se degree tak','#12C2A5')+tool('openNP','📓','Notepad','Diary, paper notes, study notes aur planner. Likho, draw karo, photo lagao','#D6336F')+tool('openDoubts','📸','Doubts','Jo question na aaye uska photo ya screenshot save karo, edit karke share karo','#2F6FEB')+tool('openRem','⏰','Study reminder','Time par ghanti, countdown aur phone ka alarm','#8D52EA')+tool('openExm','🎓','Exam countdown',(function(){var n=exmNext();return n?esc(n.name)+': '+diffDays(n.date,today())+' din bache':'Exam ki date daalo, din ginte jao'})(),'#E5484D')+tool('openFoc','⏱️','Focus timer','25 min padho, break lo. Roz ka focus time dikhega','#2F6FEB')+tool('openWk','📊','Weekly report','Is hafte ka lecture, best din aur subject-wise','#12C2A5')+tool('openRvl','🔁','Revision list','Padhe hue lecture 1, 3, 7, 15 din baad dohrao. Abhi baaki: '+rvItems().length,'#FF9F1C')+tool('openTorch','🔦','Torch','Dil ko chhuo, torch on ya off','#FF4D8D')+tool('openTpls','🎨','Templates','App ka poora design badlo. Data aur tools wahi rahenge','#6F55F5')}
 
 var FTXT=`# Algebra|🔢|#6F55F5
 ## Identities|1
@@ -2824,7 +2943,7 @@ async function npMakeNb(name,ty,cv,em){var nb={id:nid('n'),name:name,type:ty,col
  pg.thumb=await npThumb({bg:pg.bg,tpl:pg.tpl,pc:pg.pc,ts:pg.ts,items:pg.items});await ndx('pg','readwrite',function(s){return s.put(pg)});await ndx('nb','readwrite',function(s){return s.put(nb)});return nb}
 
 /* ---------- start ---------- */
-initStore().then(function(){seedIndia();applyTheme();render();setInterval(remTick,1000);remSync();
+initStore().then(function(){seedIndia();applyTheme();lockShow();render();setInterval(remTick,1000);remSync();setTimeout(function(){abRun(false)},4000);document.addEventListener('visibilitychange',function(){if(!document.hidden)abRun(false)});
  if(recovered)toast('Purana data wapas mil gaya ✓');
  else{try{var tk=totals().d-totals().pre,lb=S.lastBackup||'';if(tk>0&&(!lb||diffDays(today(),lb)>=3))setTimeout(function(){toast('💾 Update se pehle Settings > Backup le lo')},1500)}catch(e){}}
 });

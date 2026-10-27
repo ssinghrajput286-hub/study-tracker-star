@@ -1822,6 +1822,7 @@ function allRows(){
 
 /* ---------- auto backup, weekly report, revision list ---------- */
 var abBusy=false;
+function hmsStamp(){var d=new Date(),z=function(n){return ('0'+n).slice(-2)};return z(d.getHours())+z(d.getMinutes())+z(d.getSeconds())}
 async function abRun(force,quiet){if(abBusy)return;try{
  if(!S||!window.AndroidBridge||!AndroidBridge.saveFile){if(force&&!quiet)toast('Auto backup sirf APK me chalta hai');return}
  if(!force&&S.autoBk===false)return;
@@ -1829,7 +1830,7 @@ async function abRun(force,quiet){if(abBusy)return;try{
  abBusy=true;var sel={main:true,notes:true,doubts:true},o=await bkBuild(sel),js=JSON.stringify(o);
  if(js.length>24e6){sel.doubts=false;o=await bkBuild(sel);js=JSON.stringify(o)}
  if(js.length>24e6){sel.notes=false;o=await bkBuild(sel);js=JSON.stringify(o)}
- await nativeSave(new File([js],'study-tracker-auto-backup-'+today()+'.json',{type:'application/json'}));
+ await nativeSave(new File([js],'study-tracker-auto-backup-'+today()+'-'+hmsStamp()+'.json',{type:'application/json'}));
  S.autoBkLast=today();S.lastBackup=today();save();render()}catch(e){if(force&&!quiet)toast('Auto backup nahi ban paya')}abBusy=false}
 function abPin(){if(!S||S.autoBk===false||!window.AndroidBridge||!AndroidBridge.saveFile)return;if(abBusy){setTimeout(abPin,1500);return}abRun(true,true)}
 var wkOff=0,WKL=['Som','Man','Bud','Gur','Shu','San','Rav'];
@@ -1941,7 +1942,7 @@ async function bkBuild(sel){var o={lt:'backup',v:1,when:today(),parts:{}};
  if(sel.notes){var nb=await ndx('nb','readonly',function(s){return s.getAll()}),pg=await ndx('pg','readonly',function(s){return s.getAll()});o.parts.notes={nb:await bkSer(nb||[]),pg:await bkSer(pg||[])}}
  return o}
 async function bkSave(kind){if(!sheet||!sheet.sel)return;var sel=sheet.sel;
- try{toast('Backup ban raha hai...');var o=await bkBuild(sel),js=JSON.stringify(o),nm='study-tracker-backup-'+today();
+ try{toast('Backup ban raha hai...');var o=await bkBuild(sel),js=JSON.stringify(o),nm='study-tracker-backup-'+today()+'-'+hmsStamp();
   if(kind==='json'){await shareBlob(new Blob([js],{type:'application/json'}),nm+'.json','application/json','Study Tracker Backup')}
   else{var asc=js.replace(/[\u007f-￿]/g,function(c){return '\\u'+('0000'+c.charCodeAt(0).toString(16)).slice(-4)}),R=bkRows(o);
    await shareBlob(makePDF(R,{footer:1,attach:{name:'study-tracker-backup.json',data:asc}}),nm+'.pdf','application/pdf','Study Tracker Backup')}
@@ -1961,7 +1962,7 @@ async function bkRead(f){try{var txt,hd=new Uint8Array(await f.slice(0,5).arrayB
   if(String.fromCharCode.apply(null,hd).indexOf('%PDF')===0){toast('PDF padh raha hu...');var pt=new TextDecoder('latin1').decode(new Uint8Array(await f.arrayBuffer())),mi=pt.indexOf('/Type /EmbeddedFile');if(mi<0)throw 0;var ml=/\/Length (\d+)/.exec(pt.slice(mi,mi+200)),ss=pt.indexOf('stream\n',mi);if(!ml||ss<0)throw 0;txt=pt.substr(ss+7,+ml[1])}
   else txt=await new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result)};r.onerror=rej;r.readAsText(f)});
   var o=JSON.parse(txt);if(!o||o.lt!=='backup'||!o.parts)throw 0;
-  var c={},P=o.parts;if(P.main)c.main='Backup me hai: '+(P.main.subjects?P.main.subjects.length:0)+' subject, '+Object.keys(P.main.done||{}).length+' lecture tick';if(P.notes)c.notes='Backup me hai: '+P.notes.nb.length+' notebook, '+P.notes.pg.length+' page';if(P.doubts)c.doubts='Backup me hai: '+P.doubts.length+' photo';
+  var c={},P=o.parts;if(P.main)c.main='Backup me hai: '+(P.main.subjects?P.main.subjects.length:0)+' subject, '+Object.keys(P.main.done||{}).length+' lecture tick, '+(P.main.pinH?'PIN: hai ✓':'PIN: nahi hai ✗');if(P.notes)c.notes='Backup me hai: '+P.notes.nb.length+' notebook, '+P.notes.pg.length+' page';if(P.doubts)c.doubts='Backup me hai: '+P.doubts.length+' photo';
   if(!Object.keys(c).length)throw 0;
   var sel={main:!!P.main,notes:!!P.notes,doubts:!!P.doubts};sheet=null;openSheet({type:'bkr',o:o,cnt:c,sel:sel})}
  catch(e){toast('Ye backup file ya backup wali PDF nahi lag rahi')}}

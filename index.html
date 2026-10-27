@@ -1201,7 +1201,7 @@ function screenSet(){
  h+=tgl('confetti','🎉','Confetti','Target poora hone par');
  h+=tgl('cele','🏆','Shabaashi message','Target poora hone par popup');
  h+=tgl('vibrate','📳','Tick par vibration','Lecture tick karte waqt halka jhatka');
- h+='</div><div class="grp">Torch ka dil</div><div class="list">'+torchSet()+'</div><div class="grp">Suraksha</div><div class="list">'+(S.pinH?nrow('pinSet','\ud83d\udd10','PIN badlo','App kholte waqt PIN poochta hai')+nrow('pinOff','\ud83d\udd13','PIN hatao','Lock band karo'):nrow('pinSet','\ud83d\udd10','App PIN lagao','Optional. App kholte waqt PIN poochega'))+'</div><div class="grp">Data</div><div class="list">';
+ h+='</div><div class="grp">Torch ka dil</div><div class="list">'+torchSet()+'</div><div class="grp">Suraksha</div><div class="list">'+(S.pinH?nrow('pinSet','\ud83d\udd10','PIN badlo','App kholte waqt PIN poochta hai')+nrow('pinOff','\ud83d\udd13','PIN hatao','Lock band karo')+'<div class="srow"><span class="ico">\ud83d\uddd1\ufe0f</span><span class="tx"><b>Delete par bhi PIN</b><small>Kuch hatane ya backup restore karne se pehle PIN poochega</small></span><button class="swt" role="switch" aria-checked="'+(S.delPin!==false)+'" aria-label="Delete par PIN" data-act="delPinTog"></button></div>':nrow('pinSet','\ud83d\udd10','App PIN lagao','Optional. App kholte waqt PIN poochega'))+'</div><div class="grp">Data</div><div class="list">';
  h+=nrow('dwr','🗓️','Poora din-wise report','Sab din ka PDF, ya sirf ek din ka');
  h+=nrow('bkp','💾','Backup aur Restore','Tools aur poora data file ya PDF me save karo, reset ke baad wapas lao'+(S.lastBackup?'. Aakhri backup: '+S.lastBackup:'. Abhi tak backup nahi liya'));
  h+='<div class="srow"><span class="ico">\ud83d\udd04</span><span class="tx"><b>Auto backup</b><small>'+(window.AndroidBridge&&AndroidBridge.saveFile?'Apne aap Downloads/study tracker file saver folder me'+(S.autoBkLast?'. Aakhri: '+S.autoBkLast:''):'Sirf APK app me chalta hai')+'</small></span><button class="swt" role="switch" aria-checked="'+(S.autoBk!==false)+'" aria-label="Auto backup" data-act="abTog"></button></div>';
@@ -1287,6 +1287,7 @@ function sheetBody(){var h,k,f,v;
  if(sheet.type.slice(0,2)==='np'||sheet.type==='cSteps')return npSheet();
  if(sheet.type==='bkp'||sheet.type==='bkr')return bkSheet();
  if(sheet.type==='pinSet')return pinSheet();
+ if(sheet.type==='pinAsk')return pinAskSheet();
  if(sheet.type==='prv')return '<h2>\ud83d\udd12 Private</h2><p class="sub" style="margin:6px 0 12px">App se bahar jaate hi ye band ho jata hai.</p><button class="btn pri" data-act="prvGo" data-m="web">\ud83c\udf10 Browser (search)</button><button class="btn pri" style="margin-top:8px" data-act="prvGo" data-m="tg">\u2708\ufe0f Telegram Web</button><button class="btn txt" data-act="closeSheet">Band karo</button>';
  if(sheet.type==='remNoWv')return '<h2>📲 Phone alarm</h2><p class="sub" style="margin:8px 0 12px">Ye app (APK) phone ki Clock app ko seedha nahi khol sakti. Clock app me <b>'+esc(rem12(sheet.t))+'</b> ka alarm ek baar khud lagao (naam: '+esc(sheet.label||'Study time')+').</p><p class="sub">Ya mujhse (Claude se) bolo, main phone me alarm laga dunga.</p><button class="btn pri" data-act="closeSheet">Theek hai</button>';
  if(sheet.type==='remRing')return '<h2>⏰ Padhne ka time!</h2><p class="sub" style="margin:6px 0 14px">'+esc(sheet.label||'')+' ('+esc(sheet.t)+')</p><button class="btn pri" data-act="closeSheet">Theek hai, padhne baithta hoon</button>';
@@ -1323,7 +1324,13 @@ function tickKey(k){var was=S.done[k],before=countOn(viewDate);
  if(!was&&before<S.target&&countOn(viewDate)>=S.target)celebrate()}
 function go(v){nav.stack.push(v);resetScroll=true;render()}
 function openHol(d){openSheet({type:'hol',d:d})}
-function confirmSheet(msg,yes,fn){openSheet({type:'confirm',msg:msg,yes:yes,fn:fn})}
+function confirmSheet(msg,yes,fn){openSheet({type:'confirm',msg:msg,yes:yes,fn:fn,gate:/hat jayeg|hat jayen|hamesha|hata dun|saaf/i.test(msg)})}
+var pgBad=0,pgUntil=0;
+function pinGate(fn){if(!S||!S.pinH||S.delPin===false){fn();return}openSheet({type:'pinAsk',fn:fn})}
+function pinAskSheet(){return '<h2>\ud83d\udd10 PIN daalo</h2><p class="sub" style="margin:6px 0 4px">Ye kaam delete ya restore karta hai, isliye PIN chahiye.</p><input class="inp" id="pgIn" type="password" inputmode="numeric" maxlength="6" placeholder="PIN" autocomplete="off"><button class="btn pri" style="margin-top:12px" data-act="pinAskGo">Aage badho</button>'+(S.pinHint?'<p class="sub" style="text-align:center;margin:6px 0 0">Hint: '+esc(S.pinHint)+'</p>':'')+'<button class="btn txt" data-act="closeSheet">Raho, mat karo</button>'}
+function pinAskGo(){var v=($('#pgIn')||{}).value||'',n=Date.now();if(n<pgUntil){toast('Bahut galat PIN. '+Math.ceil((pgUntil-n)/1000)+' second ruko');return}
+ if(pinHash(v)!==S.pinH){pgBad++;if(pgBad>=5){pgBad=0;pgUntil=n+30000;toast('5 baar galat. 30 second ruko')}else toast('PIN galat hai');if(navigator.vibrate)navigator.vibrate(80);return}
+ pgBad=0;var fn=sheet.fn;sheet=null;$('#sheetWrap').innerHTML='';fn()}
 
 document.addEventListener('click',function(e){
  var el=e.target.closest('[data-act]');if(!el)return;
@@ -1483,7 +1490,9 @@ document.addEventListener('click',function(e){
    confirmSheet(ff.t.name+' ke saare lecture, tick aur note hat jayenge.','Haan, hatao',function(){sheet=null;$('#sheetWrap').innerHTML='';
     mutate(function(){ff.s.topics=ff.s.topics.filter(function(x){return x.id!==tid});Object.keys(S.done).forEach(function(k){if(k.split(':')[0]===tid)delete S.done[k]});Object.keys(S.notes).forEach(function(k){if(k.split(':')[0]===tid)delete S.notes[k]});Object.keys(S.ss||{}).forEach(function(k){if(k.split(':')[0]===tid)delete S.ss[k]})},'Chapter hat gaya');
     nav.stack=nav.stack.filter(function(x){return x.t!=='topic'||x.id!==tid});render()});break}
-  case 'confirmYes':{var fn=sheet.fn;sheet=null;$('#sheetWrap').innerHTML='';fn();break}
+  case 'confirmYes':{var fn=sheet.fn,cgt=sheet.gate;sheet=null;$('#sheetWrap').innerHTML='';if(cgt)pinGate(fn);else fn();break}
+  case 'pinAskGo':pinAskGo();break;
+  case 'delPinTog':mutate(function(){S.delPin=S.delPin===false?true:false},null);break;
   case 'undo':undo();break;
   case 'tact':{var tf=toastFn;toastFn=null;$('#toast').hidden=true;if(tf)tf();break}
   case 'share':sharePDF();break;
@@ -1510,7 +1519,7 @@ document.addEventListener('click',function(e){
   case 'bkFile':bkSave('json');break;
   case 'bkPdf':bkSave('pdf');break;
   case 'bkPick':$('#bkImp').click();break;
-  case 'bkGo':bkRestore();break;
+  case 'bkGo':{var bks=sheet;pinGate(function(){sheet=bks;bkRestore()});break}
   case 'openTorch':go({t:'torch'});break;
   case 'openRem':go({t:'rem'});break;
   case 'openExm':go({t:'exm'});break;
@@ -1565,8 +1574,8 @@ document.addEventListener('click',function(e){
   case 'flag':mutate(function(){S[d.k]=!S[d.k]});break;
   case 'dwr':openSheet({type:'rep',d:viewDate});break;
   case 'dwList':closeSheet();go({t:'dwlist'});break;
-  case 'repAll':{var bA;try{bA=makePDF(allRows(),{footer:true})}catch(e){toast('PDF nahi ban paya');break}closeSheet();shareBlob(bA,'din-wise-report-'+today()+'.pdf','application/pdf','Din-wise Report');break}
-  case 'repOne':{var rd=$('#rDate'),dd1=rd&&rd.value;if(!dd1){toast('Date chuno');break}var oldV=viewDate,bO;try{viewDate=dd1;bO=makePDF(reportRows())}catch(e){viewDate=oldV;toast('PDF nahi ban paya');break}viewDate=oldV;closeSheet();shareBlob(bO,'study-report-'+dd1+'.pdf','application/pdf','Study Tracker Report');break}
+  case 'repAll':{var bA;try{bA=decoAll()}catch(e){toast('PDF nahi ban paya');break}closeSheet();shareBlob(bA,'din-wise-report-'+today()+'.pdf','application/pdf','Din-wise Report');break}
+  case 'repOne':{var rd=$('#rDate'),dd1=rd&&rd.value;if(!dd1){toast('Date chuno');break}var oldV=viewDate,bO;try{viewDate=dd1;bO=decoDay(dd1)}catch(e){viewDate=oldV;toast('PDF nahi ban paya');break}viewDate=oldV;closeSheet();shareBlob(bO,'study-report-'+dd1+'.pdf','application/pdf','Study Tracker Report');break}
   case 'resetAll':confirmSheet('Saare subject ke chapter, tick aur note hat jayenge. Settings aur chhuttiyan bachi rahengi.','Haan, saaf karo',function(){mutate(function(){var nd=defaultState();['theme','mode','target','start','weekOff','cele','confetti','vibrate','holidays','weekly','pnWd','revWd','specMap'].forEach(function(k){nd[k]=S[k]});S=nd},'Sab saaf ho gaya')});break;
   case 'closeSheet':closeSheet();break;
   case 'celeClose':$('#cele').hidden=true;break;
@@ -1592,6 +1601,136 @@ document.addEventListener('input',function(e){var t=e.target,b=t.dataset&&t.data
 
 /* ---------- PDF report ---------- */
 function hex(h){return [1,3,5].map(function(i){return (parseInt(h.substr(i,2),16)/255).toFixed(3)}).join(' ')}
+/* ---------- sundar PDF report (decorative) ---------- */
+var DPW=[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584];
+var DPB=[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584];
+var DPA=[0.05,0.09,0.12,0.18,0.3];
+function dpSan(s){return String(s==null?'':s).replace(/[–—]/g,'-').replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/₹/g,'Rs ').replace(/[^\x20-\x7E]/g,'')}
+function dpEsc(s){return s.replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)')}
+function dpTw(s,sz,b){var t=b?DPB:DPW,w=0,i;for(i=0;i<s.length;i++)w+=t[s.charCodeAt(i)-32]||556;return w*sz/1000}
+function dpFit(s,sz,b,mw){s=dpSan(s);if(dpTw(s,sz,b)<=mw)return s;while(s.length>1&&dpTw(s+'..',sz,b)>mw)s=s.slice(0,-1);return s+'..'}
+function dpWrap(s,sz,b,mw){var ws=dpSan(s).split(/\s+/),out=[],l='';ws.forEach(function(w){var t=l?l+' '+w:w;if(dpTw(t,sz,b)>mw&&l){out.push(l);l=w}else l=t});if(l)out.push(l);return out}
+function dpMix(a,b,t){var p=function(h,i){return parseInt(h.substr(i,2),16)},o='#';[1,3,5].forEach(function(i){var v=Math.round(p(a,i)*(1-t)+p(b,i)*t);o+=('0'+v.toString(16)).slice(-2)});return o}
+function dpTint(c){return dpMix(c,'#FFFFFF',.84)}
+function dpDark(c){return dpMix(c,'#000000',.32)}
+function DP(){var pages=[],P=null,o={W:595,H:842};
+ var Y=function(y){return (842-y).toFixed(2)},N=function(v){return v.toFixed(2)};
+ var G=function(a){return a!=null?'/GS'+a+' gs ':''};
+ o.page=function(){P=[];pages.push(P)};
+ o.rect=function(x,y,w,h,c,a){P.push('q '+G(a)+hex(c)+' rg '+N(x)+' '+Y(y+h)+' '+N(w)+' '+N(h)+' re f Q')};
+ var rrp=function(x,y,w,h,r){r=Math.min(r,w/2,h/2);var k=r*0.5523,X=x,B=842-(y+h),T=B+h;
+  return N(X+r)+' '+N(B)+' m '+N(X+w-r)+' '+N(B)+' l '+N(X+w-r+k)+' '+N(B)+' '+N(X+w)+' '+N(B+r-k)+' '+N(X+w)+' '+N(B+r)+' c '+N(X+w)+' '+N(T-r)+' l '+N(X+w)+' '+N(T-r+k)+' '+N(X+w-r+k)+' '+N(T)+' '+N(X+w-r)+' '+N(T)+' c '+N(X+r)+' '+N(T)+' l '+N(X+r-k)+' '+N(T)+' '+N(X)+' '+N(T-r+k)+' '+N(X)+' '+N(T-r)+' c '+N(X)+' '+N(B+r)+' l '+N(X)+' '+N(B+r-k)+' '+N(X+r-k)+' '+N(B)+' '+N(X+r)+' '+N(B)+' c h'};
+ o.rr=function(x,y,w,h,r,c,a){P.push('q '+G(a)+hex(c)+' rg '+rrp(x,y,w,h,r)+' f Q')};
+ o.rrS=function(x,y,w,h,r,c,lw,dash){P.push('q '+hex(c)+' RG '+lw+' w '+(dash?'['+dash+'] 0 d ':'')+rrp(x,y,w,h,r)+' S Q')};
+ o.card=function(x,y,w,h,r,c){o.rr(x,y+2.5,w,h,r,'#3C288C',0);o.rr(x,y+1.2,w,h,r,'#3C288C',0);o.rr(x,y,w,h,r,c||'#FFFFFF')};
+ var cp=function(cx,cy,r){var k=r*0.5523,X=cx,Yc=842-cy;return N(X+r)+' '+N(Yc)+' m '+N(X+r)+' '+N(Yc+k)+' '+N(X+k)+' '+N(Yc+r)+' '+N(X)+' '+N(Yc+r)+' c '+N(X-k)+' '+N(Yc+r)+' '+N(X-r)+' '+N(Yc+k)+' '+N(X-r)+' '+N(Yc)+' c '+N(X-r)+' '+N(Yc-k)+' '+N(X-k)+' '+N(Yc-r)+' '+N(X)+' '+N(Yc-r)+' c '+N(X+k)+' '+N(Yc-r)+' '+N(X+r)+' '+N(Yc-k)+' '+N(X+r)+' '+N(Yc)+' c h'};
+ o.circle=function(cx,cy,r,c,a){P.push('q '+G(a)+hex(c)+' rg '+cp(cx,cy,r)+' f Q')};
+ o.ring=function(cx,cy,r,lw,pct,c,tr){P.push('q '+hex(tr)+' RG '+lw+' w '+cp(cx,cy,r)+' S Q');pct=Math.max(0,Math.min(100,pct));if(pct<=0)return;
+  if(pct>=100){P.push('q '+hex(c)+' RG '+lw+' w '+cp(cx,cy,r)+' S Q');return}
+  var n=Math.max(4,Math.round(pct*.9)),i,s='';for(i=0;i<=n;i++){var t=2*Math.PI*(pct/100)*i/n;s+=N(cx+r*Math.sin(t))+' '+N(842-(cy-r*Math.cos(t)))+(i?' l ':' m ')}
+  P.push('q 1 J 1 j '+hex(c)+' RG '+lw+' w '+s+'S Q')};
+ o.star=function(cx,cy,r,c){var i,s='';for(i=0;i<10;i++){var rr2=i%2?r*.42:r,t=Math.PI*i/5;s+=N(cx+rr2*Math.sin(t))+' '+N(842-(cy-rr2*Math.cos(t)))+(i?' l ':' m ')}P.push('q '+hex(c)+' rg '+s+'h f Q')};
+ o.text=function(x,y,s,sz,b,c,al,tc){s=dpSan(s);var w=dpTw(s,sz,b)+(tc||0)*s.length;if(al==='r')x-=w;else if(al==='m')x-=w/2;P.push('BT /'+(b?'F2':'F1')+' '+sz+' Tf '+(tc?tc+' Tc ':'')+hex(c)+' rg 1 0 0 1 '+N(x)+' '+Y(y)+' Tm ('+dpEsc(s)+') Tj '+(tc?'0 Tc ':'')+'ET')};
+ o.clip=function(x,y,w,h,fn){P.push('q '+N(x)+' '+Y(y+h)+' '+N(w)+' '+N(h)+' re W n');fn();P.push('Q')};
+ o.grad=function(x,y,w,h,c1,c2){var n=48,i,sw=w/n;for(i=0;i<n;i++)o.rect(x+i*sw,y,sw+0.6,h,dpMix(c1,c2,i/(n-1)))};
+ o.n=function(){return pages.length};
+ o.each=function(fn){pages.forEach(function(pg,i){P=pg;fn(i,pages.length)})};
+ o.blob=function(){var gs='<< /GS0 << /ca '+DPA[0]+' >> /GS1 << /ca '+DPA[1]+' >> /GS2 << /ca '+DPA[2]+' >> /GS3 << /ca '+DPA[3]+' >> /GS4 << /ca '+DPA[4]+' >> >>';
+  var objs=[null,'<< /Type /Catalog /Pages 2 0 R >>',null,'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>'],kids=[];
+  pages.forEach(function(pg,i){var st=pg.join('\n');kids.push((5+i*2)+' 0 R');objs[5+i*2]='<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> /ExtGState '+gs+' >> /Contents '+(6+i*2)+' 0 R >>';objs[6+i*2]='<< /Length '+st.length+' >>\nstream\n'+st+'\nendstream'});
+  objs[2]='<< /Type /Pages /Kids ['+kids.join(' ')+'] /Count '+pages.length+' >>';
+  var out='%PDF-1.4\n',off=[],i;for(i=1;i<objs.length;i++){off[i]=out.length;out+=i+' 0 obj\n'+objs[i]+'\nendobj\n'}
+  var xr=out.length;out+='xref\n0 '+objs.length+'\n0000000000 65535 f \n';for(i=1;i<objs.length;i++)out+=String(off[i]).padStart(10,'0')+' 00000 n \n';
+  out+='trailer\n<< /Size '+objs.length+' /Root 1 0 R >>\nstartxref\n'+xr+'\n%%EOF';return new Blob([out],{type:'application/pdf'})};
+ return o}
+var DPWD=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],DPMN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function dpDate(d,wd){var x=parse(d);return (wd?DPWD[x.getDay()]+', ':'')+x.getDate()+' '+DPMN[x.getMonth()]+' '+x.getFullYear()}
+function dpHead(o,big,t1,t2,t3,tall){var P='#5B3FE0';
+ o.clip(0,0,595,tall?170:56,function(){o.grad(0,0,595,tall?170:56,'#5B3FE0','#B28CFF');
+  if(tall){o.circle(540,18,95,'#FFFFFF',2);o.circle(445,120,56,'#FFFFFF',1);o.circle(330,-4,32,'#FFFFFF',1);o.circle(60,175,70,'#FFFFFF',0)}else{o.circle(555,6,48,'#FFFFFF',2)}});
+ if(tall){o.text(40,44,t1,9.5,1,'#EDE7FF','l',2.2);o.star(40+dpTw(dpSan(t1),9.5,1)+2.2*dpSan(t1).length+12,40.5,5,'#FFD966');o.text(40,84,t2,28,1,'#FFFFFF');o.text(40,108,t3,12.5,0,'#EDE7FF')}
+ else{o.text(40,34,t1,11,1,'#FFFFFF');o.text(555,34,t2,9.5,0,'#EDE7FF','r')}}
+function dpFoot(o,mid){o.each(function(i,n){o.rect(0,808,595,34,'#FFFFFF');o.rect(0,808,595,0.8,'#ECE8FB');o.text(40,829,'Study Tracker','8.5'*1,1,'#8A87A8');o.star(40+dpTw('Study Tracker',8.5,1)+9,826.5,4,'#F5A623');o.text(297,829,mid||'','8.5'*1,0,'#8A87A8','m');o.text(555,829,'Page '+(i+1)+' / '+n,8.5,0,'#8A87A8','r')})}
+function dpChips(o,x,y,list,col,maxX){var cx=x;list.forEach(function(t){var w=dpTw(t,8.5,1)+12;if(cx+w>maxX)return;o.rr(cx,y,w,15,5,dpTint(col));o.text(cx+w/2,y+10.8,t,8.5,1,dpDark(col),'m');cx+=w+4});return cx}
+function dpGroups(items){var out=[],c=null;items.forEach(function(it){if(c&&c.t===it.t&&c.ss===!!it.ss)c.ns.push(it.n);else{c={s:it.s,t:it.t,ns:[it.n],ss:!!it.ss};out.push(c)}});return out}
+function decoDay(d){
+ var sv=asOf,sd=viewDate;asOf=d;
+ try{
+  var o=DP(),tg=S.target,c=countOn(d),p=tg?Math.round(c/tg*100):0,t=totals(),fc=forecast(),id=ideal(),ms=missedDays().filter(function(m){return m<=d}),pcAll=t.tot?Math.round(t.d/t.tot*100):0;
+  var st=0;(function(){var run=0,dd=S.start,n=0;while(dd<=d&&n++<800){if(!isHol(dd)){if(dayMet(dd)){run++}else if(dd!==d&&leftAtStart(dd)>0)run=0}dd=addDays(dd,1)}st=run})();
+  var items=[];allTopics().forEach(function(x){for(var n=1;n<=x.t.total;n++){var k=x.t.id+':'+n;if(S.done[k]===d)items.push({s:x.s,t:x.t,n:n});if(S.ss&&S.ss[k]===d)items.push({s:x.s,t:x.t,n:n,ss:1})}});
+  var ssN=items.filter(function(i){return i.ss}).length,groups=dpGroups(items);
+  var dayNo=diffDays(d,S.start)+1,hol=isHol(d)?holName(d):null;
+  o.page();dpHead(o,1,'Study Tracker  -  Daily Report',dpDate(d,1),(dayNo>0?'Roz ka hisaab  -  Day '+dayNo+' of study plan':'Roz ka hisaab'),true);
+  if(hol){var hw=dpTw('CHHUTTI: '+dpSan(hol),8.5,1)+18;o.rr(555-hw,124,hw,18,9,'#FFFFFF',3);o.text(555-hw/2,136.5,'CHHUTTI: '+hol,8.5,1,'#FFFFFF','m')}
+  o.card(40,138,515,128,16);
+  var rc=p>=100?'#2EB872':'#12C2A5';o.ring(110,202,38,11,p,rc,'#ECE8FB');o.text(110,208,p+'%',19,1,'#1F1D36','m');
+  o.text(178,166,'AAJ KA TARGET',8.5,1,'#7C7A99','l',1);o.text(178,196,String(c),26,1,'#1F1D36');o.text(178+dpTw(String(c),26,1)+6,196,'/ '+tg+' lecture',14,0,'#7C7A99');
+  var tl=[['#FF9F1C',st,'Streak (din)'],['#6F55F5',ssN,'Self study'],['#FF5C8A',t.left,'Lecture bache']],tw0=(555-22-178-16)/3;
+  tl.forEach(function(x,i){var tx=178+i*(tw0+8);o.rr(tx,208,tw0,44,10,x[0]);o.text(tx+10,230,String(x[1]),17,1,'#FFFFFF');o.text(tx+10,244,x[2],7.5,0,'#FFFFFF')});
+  var y=284,pgY=function(h){if(y+h>792){o.page();dpHead(o,0,'Study Tracker',dpDate(d,1),'','');y=76}};
+  var h2=function(txt,pill){pgY(24);o.text(40,y+10,txt,12.5,1,'#1F1D36');if(pill){var w=dpTw(dpSan(pill),8.5,1)+16,x0=40+dpTw(dpSan(txt),12.5,1)+10;o.rr(x0,y-1,w,16,8,'#EDE8FF');o.text(x0+w/2,y+10,pill,8.5,1,'#5B3FE0','m')}y+=22};
+  h2('Aaj kya kiya');
+  if(!groups.length){pgY(40);o.rr(40,y,515,34,12,'#F2F0FB');o.text(297,y+21,'Is din koi lecture ya self study tick nahi hua.',9.5,0,'#7C7A99','m');y+=42}
+  groups.forEach(function(g){pgY(44);o.card(40,y,515,36,11);o.rr(40,y,6,36,3,g.s.color);o.text(58,y+15,dpFit(g.t.name,10.5,1,300),10.5,1,'#1F1D36');o.text(58,y+27,dpFit(g.s.name+(g.ss?'  -  Self study':''),8.5,0,300),8.5,0,'#7C7A99');
+   var chs=g.ns.slice(0,9).map(function(n){return 'L'+n});if(g.ns.length>9)chs.push('+'+(g.ns.length-9));var tw1=0;chs.forEach(function(q){tw1+=dpTw(q,8.5,1)+16});dpChips(o,555-12-tw1+4,y+10.5,chs,g.s.color,555);y+=42});
+  var nt=S.dayNotes&&S.dayNotes[d],rs=S.missReason&&S.missReason[d];
+  [['Note: ',nt],['Reason: ',(!c&&!hol)?rs:null]].forEach(function(q){if(!q[1])return;var ls=dpWrap(q[0]+String(q[1]).replace(/\s+/g,' '),9.5,0,480),hh=ls.length*13+14;pgY(hh+8);o.rr(40,y,515,hh,10,'#FFF4CC');o.rr(40,y,5,hh,2.5,'#F5A623');ls.forEach(function(l,i){o.text(56,y+16+i*13,l,9.5,0,'#5A4300')});y+=hh+8});
+  y+=6;h2('Poora progress',t.d+' / '+t.tot+'  -  '+pcAll+'%');
+  S.subjects.forEach(function(sj){var ss=subjStats(sj);if(!ss.tot)return;var pills=sj.topics.map(function(tp){return dpFit(tp.name,8.5,1,150)+' '+topicDone(tp)+'/'+tp.total}),rows=[[]],cx=0;
+   pills.forEach(function(q){var w=dpTw(q,8.5,1)+14;if(cx+w>487){rows.push([]);cx=0}rows[rows.length-1].push(q);cx+=w+5});
+   var hh=48+(pills.length?rows.length*21:0);pgY(hh+8);o.card(40,y,515,hh,13);o.text(56,y+19,dpFit(sj.name,11,1,300),11,1,dpDark(sj.color));o.text(539,y+19,ss.d+' / '+ss.tot+'  -  '+ss.p+'%',10,1,'#1F1D36','r');
+   o.rr(56,y+27,483,7,3.5,'#ECE8FB');if(ss.p>0)o.rr(56,y+27,Math.max(7,483*Math.min(ss.p,100)/100),7,3.5,sj.color);
+   rows.forEach(function(r,ri){var cx2=56;r.forEach(function(q){var w=dpTw(q,8.5,1)+14;o.rr(cx2,y+42+ri*21,w,16,8,'#F2F0FB');o.text(cx2+w/2,y+53+ri*21,q,8.5,1,'#5A5878','m');cx2+=w+5})});y+=hh+8});
+  y+=2;pgY(44);o.rr(40,y,515,36,13,'#12C2A5');o.grad(40,y,515,36,'#12C2A5','#4BD6BE');
+  o.clip(40,y,515,36,function(){o.circle(540,y+4,40,'#FFFFFF',1)});
+  o.text(58,y+22,fc?'Sab khatam hone ki date: '+dpDate(fc,1)+(diffDays(fc,id)>0?'  ('+diffDays(fc,id)+' din aage)':''):'Sab lecture poore! Shabaash!',11,1,'#FFFFFF');o.star(530,y+18,8,'#FFE08A');y+=46;
+  var hk=Object.keys(S.holidays).filter(function(h){return h<=d}).sort();
+  if(ms.length){h2('Chhoote hue din',String(ms.length));ms.slice(-8).forEach(function(m){pgY(26);o.rr(40,y,515,22,8,'#FFE9EA');o.text(52,y+15,dpDate(m,1)+'  -  '+countOn(m)+' / '+tg+' hua',9,1,'#B3262B');if(S.missReason[m])o.text(543,y+15,dpFit(S.missReason[m],9,0,230),9,0,'#7C7A99','r');y+=26})}
+  if(hk.length){y+=4;h2('Chhuttiyan',String(hk.length));hk.slice(-10).forEach(function(h){pgY(26);o.rr(40,y,515,22,8,'#EEEDF6');o.text(52,y+15,dpDate(h,1),9,1,'#5A5878');o.text(543,y+15,dpFit(S.holidays[h],9,0,250),9,0,'#7C7A99','r');y+=26})}
+  dpFoot(o,'Study Tracker Report');return o.blob()
+ }finally{asOf=sv;viewDate=sd}}
+function decoAll(){
+ var o=DP(),td=today(),tg=S.target,t=totals(),q=[],d,n,fc=forecast(),last=td,first=S.start,st=streaks();
+ allTopics().forEach(function(x){for(var k=1;k<=x.t.total;k++)if(!S.done[x.t.id+':'+k])q.push({s:x.s,t:x.t,n:k})});
+ if(fc&&fc>last)last=fc;vals().forEach(function(v){if(v!=='pre'&&v>last)last=v});
+ var days=[];
+ for(d=first,n=0;d<=last&&n++<800;d=addDays(d,1)){
+  var hol=isHol(d),c=countOn(d),R={d:d,hol:hol?holName(d):null,c:c,rows:[],note:S.dayNotes&&S.dayNotes[d],today:d===td,plan:d>td,pc:Math.round(c/tg*100),miss:S.missReason&&S.missReason[d]};
+  if(d>td){if(hol){days.push(R);continue}var its=[],cap=tg;while(cap-->0&&q.length)its.push(q.shift());R.rows=dpGroups(its);days.push(R);continue}
+  var done=[];allTopics().forEach(function(x){for(var k=1;k<=x.t.total;k++)if(S.done[x.t.id+':'+k]===d)done.push({s:x.s,t:x.t,n:k})});R.rows=dpGroups(done);
+  if(d===td&&!hol&&q.length){var cp2=Math.max(0,tg-c),ex=[];while(cp2-->0&&q.length)ex.push(q.shift());R.extra=dpGroups(ex)}
+  days.push(R)}
+ var nd=days.length;
+ o.page();dpHead(o,1,'Study Tracker  -  Din-wise Report','My Study Journey',dpDate(first)+'  to  '+dpDate(last)+'   |   '+nd+' din',true);
+ var sx=[['#12C2A5',t.d+' / '+t.tot,'Poora hua',(t.tot?Math.round(t.d/t.tot*100):0)+'% lecture complete'],['#FF9F1C',st.cur+' din','Streak','best '+st.best+' din'],['#6F55F5',String(ssTotal()),'Self study','lecture'],['#FF5C8A',String(t.left),'Lecture bache',fc?'khatam: '+dpDate(fc):'sab poore!']],sw=(515-27)/4.3;
+ sx.forEach(function(x,i){var w=i===0?sw*1.3:sw,xx=40+(i===0?0:sw*1.3+9+(i-1)*(sw+9));o.card(xx,140,w,84,14,'#FFFFFF');o.rr(xx,140,w,84,14,x[0]);o.text(xx+12,158,x[2],8.5,0,'#FFFFFF');o.text(xx+12,186,x[1],21,1,'#FFFFFF');o.text(xx+12,208,x[3],8,0,'#FFFFFF')});
+ var y=246;
+ var lg=[['#2EB872','Poora'],['#FFB400','Adhura'],['#E5484D','Chhoota'],['#9A97B8','Chhutti'],['#C9C2F5','Plan']],lx=42;lg.forEach(function(l){o.rr(lx,y,9,9,3,l[0]);o.text(lx+13,y+8,l[1],8.5,0,'#7C7A99');lx+=dpTw(l[1],8.5,0)+30});y+=20;
+ var pgY=function(h){if(y+h>796){o.page();dpHead(o,0,'Study Tracker',dpDate(first)+'  to  '+dpDate(last),'','');y=76}};
+ days.forEach(function(R){
+  var d0=R.d,wd=parse(d0).getDay(),lines=[],ex=R.extra||[];
+  R.rows.forEach(function(g){lines.push({g:g})});
+  if(R.hol)lines.unshift({txt:'Chhutti: '+R.hol,mut:1});
+  if(!R.rows.length&&!R.hol&&!R.plan)lines.push({txt:'Pending notes: nahi hua'+(R.miss?'. Reason: '+R.miss:''),mut:1});
+  if(R.plan&&!R.rows.length&&!R.hol)lines.push({txt:'Kuch baaki nahi',mut:1});
+  if(ex.length){lines.push({txt:'Baaki aaj ke liye:',mut:1,small:1});ex.forEach(function(g){lines.push({g:g,dim:1})})}
+  if(R.note)lines.push({note:R.note});
+  var hh=Math.max(40,14+lines.length*18);pgY(hh+8);
+  var col=R.plan?'#C9C2F5':R.today?'#6F55F5':R.hol&&!R.c?'#9A97B8':R.pc>=100?'#2EB872':R.c>0?'#FFB400':'#E5484D';
+  if(R.plan){o.rr(40,y,515,hh,13,'#F5F3FF');o.rrS(40,y,515,hh,13,'#C9C2F5',1,'3 2')}else{o.card(40,y,515,hh,13)}
+  if(R.today)o.rrS(40,y,515,hh,13,'#6F55F5',1.5);
+  o.clip(40,y,50,hh,function(){o.rr(40,y,515,hh,13,col)});
+  o.text(65,y+hh/2+2,String(parse(d0).getDate()),17,1,'#FFFFFF','m');o.text(65,y+hh/2+13,R.today?'TODAY':DPWD[wd].slice(0,3).toUpperCase(),7.5,1,'#FFFFFF','m',.8);
+  var ly=y+19;
+  lines.forEach(function(l){
+   if(l.g){var g=l.g;o.text(102,ly,dpFit(g.t.name+(g.ss?' (SS)':''),9.5,1,100),9.5,1,R.plan||l.dim?'#7C7A99':'#1F1D36');var chs=g.ns.slice(0,9).map(function(k){return 'L'+k});if(g.ns.length>9)chs.push('+'+(g.ns.length-9));dpChips(o,206,ly-11,chs,g.s.color,490)}
+   else if(l.note){var w=dpTw(dpSan('Note: '+l.note),8.5,0)+14;w=Math.min(w,380);o.rr(102,ly-11,w,15,5,'#FFF4CC');o.text(109,ly-0.5,dpFit('Note: '+String(l.note).replace(/\s+/g,' '),8.5,0,w-12),8.5,0,'#8A6A00')}
+   else{o.text(102,ly,dpFit(l.txt,l.small?8.5:9.5,!l.small&&l.txt.indexOf('Chhutti')===0?1:0,350),l.small?8.5:9.5,0,'#7C7A99')}
+   ly+=18});
+  if(R.plan)o.text(541,y+hh/2+3,'PLAN',8.5,1,'#B8B1EE','r',1);else if(!(R.hol&&!R.c))o.text(541,y+hh/2+5,R.pc+'%',15,1,R.today?'#6F55F5':R.pc>=100?'#2EB872':R.c>0?'#E59A00':'#E5484D','r');
+  y+=hh+8});
+ dpFoot(o,'Aaj tak ka hisaab asli hai, aage ki dates Plan hain');return o.blob()}
 function makePDF(rows,opt){
  var W=595,H=842,M=44,pages=[[]],y=H-M,pcol=hex((THEMES[S.theme]||THEMES.jamuni)[1]);
  var cp=function(){return pages[pages.length-1]};
@@ -1650,7 +1789,7 @@ async function shareBlob(blob,name,type,title){
  var f=new File([blob],name,{type:type});
  try{if(await shareFiles([f],title))return;dl(f);toast('Is browser ya app me share menu nahi chal raha, isliye file download ho gayi.')}
  catch(e){if(e&&e.name==='AbortError')return;try{dl(f);toast('Share nahi ho paya, file download ho gayi.')}catch(x){toast('File nahi ban payi, dobara try karo')}}}
-async function sharePDF(){var b;try{b=makePDF(reportRows())}catch(e){toast('PDF nahi ban paya');return}await shareBlob(b,'study-report-'+viewDate+'.pdf','application/pdf','Study Tracker Report')}
+async function sharePDF(){var b;try{b=decoDay(viewDate)}catch(e){toast('PDF nahi ban paya');return}await shareBlob(b,'study-report-'+viewDate+'.pdf','application/pdf','Study Tracker Report')}
 
 function allRows(){
  var td=today(),tg=S.target,t=totals(),A0='#6F55F5',R=[],q=[],d,n,fc=forecast(),last=td,first=S.start;
@@ -1829,7 +1968,7 @@ async function bkRestore(){if(!sheet||sheet.type!=='bkr')return;var o=sheet.o,se
  try{toast('Restore ho raha hai...');
   if(sel.notes&&P.notes){var nb=bkRev(P.notes.nb),pg=bkRev(P.notes.pg);await ndx('nb','readwrite',function(s){s.clear();nb.forEach(function(r){s.put(r)});return null});await ndx('pg','readwrite',function(s){s.clear();pg.forEach(function(r){s.put(r)});return null});np.docs={};np.bm={};np.nb=null;np.pgs=[];await npLoadNbs()}
   if(sel.doubts&&P.doubts){var dd=bkRev(P.doubts);await dbx('readwrite',function(s){s.clear();dd.forEach(function(r){s.put(r)});return null});await dbLoad()}
-  if(sel.main&&P.main){var d=defaultState(),m=P.main;for(var k in d){if(m[k]===undefined)m[k]=d[k]}S=m;undoStack=[];S.lastBackup=S.lastBackup||'';save();applyTheme()}
+  if(sel.main&&P.main){var d=defaultState(),m=P.main;if(!m.pinH&&S&&S.pinH){m.pinH=S.pinH;m.pinLen=S.pinLen;m.pinHint=S.pinHint}for(var k in d){if(m[k]===undefined)m[k]=d[k]}S=m;undoStack=[];S.lastBackup=S.lastBackup||'';save();applyTheme();if(S.pinH)lockShow()}
   closeSheet();nav.stack=[];render();toast('Restore ho gaya ✓')}
  catch(e){toast('Restore nahi ho paya')}}
 

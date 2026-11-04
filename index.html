@@ -1584,10 +1584,12 @@ function sheetBody(){var h,k,f,v;
   if(ed)h+='<button class="btn bad" data-act="delTopicAsk">🗑 Chapter hatao</button>';
   return h+'<button class="btn txt" data-act="closeSheet">Raho</button>'}
  if(sheet.type==='day')return '<h2>📝 '+esc(fmtY(sheet.d))+' ka note</h2><p class="sub">Apni baat likho, apne aap save hoti hai.</p><textarea class="ta big" rows="8" maxlength="1500" placeholder="Aaj kya padha, kya samajh nahi aaya, kal ka plan..." data-bind="day:'+sheet.d+'" aria-label="Is din ka note">'+esc(S.dayNotes[sheet.d]||'')+'</textarea><button class="btn pri" data-act="closeSheet">Ho gaya</button>';
- if(sheet.type==='subj'){var es=sheet.id?S.subjects.filter(function(x){return x.id===sheet.id})[0]:null,nm=sheet.name!==undefined?sheet.name:(es?es.name:''),em=sheet.emoji||(es?es.emoji:'📘');
+ if(sheet.type==='subj'){var es=sheet.id?S.subjects.filter(function(x){return x.id===sheet.id})[0]:null,nm=sheet.name!==undefined?sheet.name:(es?es.name:''),em=sheet.emoji||(es?es.emoji:'📘'),cl=sheet.color||(es?es.color:nextCol());
   h='<h2>'+(es?'Subject badlo':'Naya subject')+'</h2><input class="inp" type="text" id="sName" maxlength="30" placeholder="Subject ka naam" value="'+esc(nm)+'" aria-label="Subject ka naam"><p class="sub" style="margin-top:12px">Emoji chuno</p><div class="emo">';
   ['📘','💻','📐','🧪','🌍','📖','🎨','⚡','🧠','🏛️'].forEach(function(x){h+='<button class="'+(x===em?'on':'')+'" data-act="pickEmoji" data-v="'+x+'">'+x+'</button>'});
-  h+='</div><button class="btn pri" data-act="saveSubj">Save karo</button>';
+  h+='</div><p class="sub" style="margin-top:12px">Rang chuno ya apna color code likho</p><div style="display:flex;flex-wrap:wrap;gap:8px">';
+  SCOLS.forEach(function(x){h+='<button data-act="pickCol" data-v="'+x+'" aria-label="Rang '+x+'" style="width:34px;height:34px;border-radius:50%;background:'+x+';border:'+(x.toUpperCase()===cl.toUpperCase()?'4px solid var(--tx)':'2px solid var(--line)')+';padding:0"></button>'});
+  h+='</div><div style="display:flex;gap:8px;align-items:center;margin-top:10px"><input type="color" id="sCol" value="'+cl.toLowerCase()+'" aria-label="Rang chuno" style="width:52px;height:46px;padding:0;border:0;background:none"><input class="inp" type="text" id="sHex" maxlength="7" value="'+esc(cl.toUpperCase())+'" placeholder="#RRGGBB" aria-label="Rang ka code" style="flex:1;margin:0"><span id="sPrev" style="width:46px;height:46px;border-radius:12px;background:'+cl+';border:2px solid var(--line)"></span></div><button class="btn pri" data-act="saveSubj">Save karo</button>';
   if(es)h+='<button class="btn bad" data-act="delSubjAsk">🗑 Subject hatao</button>';
   return h+'<button class="btn txt" data-act="closeSheet">Raho</button>'}
  if(sheet.type==='rep')return '<h2>🗓️ Din-wise report</h2><p class="sub">PDF banega, share menu se save ya bhej sakte ho.</p><button class="btn pri" data-act="repAll">📚 Poora report (sab din)</button><button class="btn ghost" data-act="dwList">👁️ Din-wise list dekho</button><p class="sub" style="margin-top:14px">Ya sirf ek din ka:</p><input class="inp" type="date" id="rDate" value="'+sheet.d+'" aria-label="Date chuno"><button class="btn ghost" data-act="repOne">📅 Sirf ek din ka report</button><button class="btn txt" data-act="closeSheet">Band karo</button>';
@@ -1945,9 +1947,10 @@ document.addEventListener('click',function(e){
   case 'openDiary':go({t:'diary'});break;
   case 'addSubj':openSheet({type:'subj'});break;
   case 'editSubj':openSheet({type:'subj',id:d.id});break;
-  case 'pickEmoji':sheet.name=$('#sName').value;sheet.emoji=d.v;drawSheet();break;
-  case 'saveSubj':{var sn=$('#sName').value.trim();if(!sn){toast('Subject ka naam likho');break}var se=sheet.emoji,sid2=sheet.id;sheet=null;$('#sheetWrap').innerHTML='';
-   mutate(function(){if(sid2){var o=S.subjects.filter(function(x){return x.id===sid2})[0];o.name=sn;if(se)o.emoji=se}else{var pal=['#7C5CFF','#FF7A59','#2EC4B6','#F4B400','#4C9AFF','#E056C0'];S.subjects.push({id:'s'+Date.now().toString(36),name:sn,emoji:se||'📘',color:pal[S.subjects.length%pal.length],topics:[]})}});break}
+  case 'pickEmoji':sheet.name=$('#sName').value;sheet.emoji=d.v;sheet.color=($('#sHex')||{}).value||sheet.color;drawSheet();break;
+  case 'pickCol':sheet.name=$('#sName').value;sheet.color=d.v;drawSheet();break;
+  case 'saveSubj':{var sn=$('#sName').value.trim();if(!sn){toast('Subject ka naam likho');break}var hx=(($('#sHex')||{value:''}).value||'').trim();if(hx&&hx[0]!=='#')hx='#'+hx;if(hx&&!/^#[0-9a-f]{6}$/i.test(hx)){toast('Color code galat hai, aisa likho: #FF7A59');break}hx=hx.toUpperCase();var se=sheet.emoji,sid2=sheet.id;sheet=null;$('#sheetWrap').innerHTML='';
+   mutate(function(){if(sid2){var o=S.subjects.filter(function(x){return x.id===sid2})[0];o.name=sn;if(se)o.emoji=se;if(hx)o.color=hx}else{S.subjects.push({id:'s'+Date.now().toString(36),name:sn,emoji:se||'📘',color:hx||nextCol(),topics:[]})}});break}
   case 'delSubjAsk':{var ds=sheet.id,dso=S.subjects.filter(function(x){return x.id===ds})[0];
    confirmSheet(dso.name+' ke saare chapter, tick aur note hat jayenge.','Haan, hatao',function(){mutate(function(){var ids=dso.topics.map(function(x){return x.id});S.subjects=S.subjects.filter(function(x){return x.id!==ds});[S.done,S.notes].forEach(function(m){Object.keys(m).forEach(function(k){if(ids.indexOf(k.split(':')[0])>=0)delete m[k]})})},'Subject hat gaya');nav.stack=[];render()});break}
   case 'flag':mutate(function(){S[d.k]=!S[d.k]});break;
@@ -4632,8 +4635,13 @@ window.addEventListener('message',function(e){var m=e.data;if(!m||typeof m!=='ob
 window.addEventListener('resize',function(){requestAnimationFrame(enSync)});
 EN.load=enGet().then(function(d){EN.d=d;EN.loaded=true;if(d&&/"remind":"\d/.test(d))enMake();enInit();return d});
 
+/* ---------- subject colours ---------- */
+var SCOLS=['#7C5CFF','#FF7A59','#2EC4B6','#F4B400','#4C9AFF','#E056C0','#2EB872','#E5484D','#FF9F1C','#12C2A5','#D6336F','#6F55F5','#8D6E63','#607D8B','#00BCD4','#9CCC65'];
+function nextCol(skip){var used={};S.subjects.forEach(function(s){if(s!==skip)used[String(s.color||'').toUpperCase()]=1});for(var i=0;i<SCOLS.length;i++)if(!used[SCOLS[i].toUpperCase()])return SCOLS[i];return SCOLS[S.subjects.length%SCOLS.length]}
+function fixSubjCols(){if(!S||S.colFix)return;var seen={},ch=false;S.subjects.forEach(function(s){var k=String(s.color||'').toUpperCase();if(seen[k]){s.color=nextCol(s);ch=true;k=String(s.color).toUpperCase()}seen[k]=1});S.colFix=1;try{save()}catch(e){}if(ch)render()}
+document.addEventListener('input',function(e){var t=e.target;if(!t||(t.id!=='sCol'&&t.id!=='sHex'))return;var v=String(t.value||'').trim();if(t.id==='sHex'&&v&&v[0]!=='#')v='#'+v;if(!/^#[0-9a-f]{6}$/i.test(v))return;var a=$('#sCol'),h=$('#sHex'),p=$('#sPrev');if(t.id==='sCol'&&h)h.value=v.toUpperCase();if(t.id==='sHex'&&a)a.value=v.toLowerCase();if(p)p.style.background=v;if(sheet&&sheet.type==='subj')sheet.color=v.toUpperCase()});
 /* ---------- start ---------- */
-initStore().then(function(){seedIndia();applyTheme();lockShow();render();npLoadNbs().then(function(){if(nav.tab==='tools'&&!cur())render()});setInterval(remTick,1000);remSync();setTimeout(function(){abRun(false)},4000);document.addEventListener('visibilitychange',function(){if(!document.hidden)abRun(false)});
+initStore().then(function(){seedIndia();fixSubjCols();applyTheme();lockShow();render();npLoadNbs().then(function(){if(nav.tab==='tools'&&!cur())render()});setInterval(remTick,1000);remSync();setTimeout(function(){abRun(false)},4000);document.addEventListener('visibilitychange',function(){if(!document.hidden)abRun(false)});
  if(recovered)toast('Purana data wapas mil gaya ✓');
  else{try{var tk=totals().d-totals().pre,lb=S.lastBackup||'';if(tk>0&&(!lb||diffDays(today(),lb)>=3))setTimeout(function(){toast('💾 Update se pehle Settings > Backup le lo')},1500)}catch(e){}}
 });

@@ -676,6 +676,7 @@ h1,h2,h3,p{margin:0}
 .qtk.cl{color:#E5484D}.qtk.bk{color:#F59F00}
 .qtgo{background:var(--c);color:#fff;border-radius:18px;min-height:54px;font-weight:700;letter-spacing:.08em;font-size:16px;box-shadow:0 8px 16px -8px var(--c);width:100%}
 .qtgo:active{transform:translateY(2px)}
+.qtopt{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:0 0 12px}.qtch{padding:7px 12px;border-radius:14px;background:var(--bg);border:1.5px solid var(--c);color:var(--c);font-weight:700;font-size:13px}.qtch.on{background:var(--c);color:#fff}.qtlb{font-size:13px;font-weight:700;color:var(--mut);margin:8px 0 6px;text-align:left}.qtq{font-size:30px;font-weight:800;color:var(--c);margin:4px 0 8px}.qtdt2{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:10px}.qtarr{font-size:20px;font-weight:700;color:var(--c)}.qtta{width:100%;min-height:150px;border:2px solid var(--c);border-radius:16px;background:var(--bg);color:var(--tx);font-size:16px;padding:10px;font-family:inherit;-webkit-user-select:auto;user-select:auto;resize:vertical;box-sizing:border-box}.qtres{overflow-wrap:anywhere}
 .qtdt{display:grid;grid-template-columns:1fr 1.2fr 1.2fr;gap:8px}
 .qtsel{min-height:56px;border:2px solid var(--c);border-radius:16px;background:var(--bg);color:var(--tx);font-size:17px;font-weight:700;padding:0 8px;font-family:inherit;width:100%;-webkit-user-select:auto;user-select:auto}
 /* Chemistry */
@@ -1869,7 +1870,8 @@ document.addEventListener('click',function(e){
   case 'fx3a':fx.auto=!fx.auto;render();break;
   case 'fx3r':fx.yaw=-0.7;fx.pit=0.5;fx.dirty=true;break;
   case 'openQT':qt={k:'',v:'',res:''};go({t:'qt'});break;
-  case 'qto':qt={k:d.v,v:'',res:''};go({t:'qt',k:d.v});break;
+  case 'qto':if(QTD[d.v]&&QTD[d.v].go==='foc'){go({t:'foc'});break}if(QTD[d.v]&&QTD[d.v].go==='formulas'){fx.ch=-1;fx.sc=-1;fx.q='';fx.lst=false;go({t:'formulas'});break}qt={k:d.v,v:'',res:''};go({t:'qt',k:d.v});if(QTD[d.v]&&QTD[d.v].auto){qt.res=qCalc(d.v);render()}break;
+  case 'qopt':{var cq=cur(),dq=cq&&QTD[cq.k];if(dq){qt.o=d.v;qt.v='';qt.v2='';qt.res='';qt.f=undefined;qt.t=undefined;qt.qz=null;if(dq.auto)qt.res=qCalc(cq.k);render()}break}
   case 'qk':qtKey(d.v);break;
   case 'qtc':qtCalcGo();break;
   case 'openChem':go({t:'chem'});break;
@@ -2926,7 +2928,7 @@ function bkc(a,v,e,t,d,c){var n=/^[0-9A-Za-z]{1,4}$/.test(e)&&/^[0-9]/.test(e);r
 function bkTool(a,e,t,d,c){var u=S.cu||{};if((u.th||{})[a])return '';c=(u.tc||{})[a]||c;return bkc(a,'',e,t,d,c)}
 function bkSearch(ph,val,id){return '<div class="chsr"><input class="inp" id="'+(id||'egq')+'" placeholder="'+esc(ph)+'" autocomplete="off" autocapitalize="none" value="'+esc(val||'')+'"><button class="btn pri" style="margin:0" data-act="'+(id==='fxq'?'fxs':'egs')+'">Dhundo</button></div>'}
 function screenSubjs(){return '<p class="bkin">Subject chuno, folder khulega</p>'+bkTool('openChem','🧪','Chemistry','3D periodic table, classification aur mass calculators','#00897B')+bkTool('openEng','📘','English Grammar','Basic Grammar (chapter-wise) aur 120 Golden Rule','#E5484D')+bkTool('openMaps','🗺️','Maps','World and India maps. Tap to explore, take quizzes. Fully offline','#1E88E5')+bkTool('openFormulas','📐','Formulas','Algebra, trig, inverse trig, calculus. Class 8 se degree tak','#12C2A5')}
-function screenTools(){return tool('openQT','⚡','Quick Tools','Prime, LCM/HCF, BODMAS, Age, Triplet, Ratio aur 9 tools aur. Number daalo, jawab pao','#009688')+tool('openEN','📓','Notepad','Notes, checklist, draw, photo, templates, PIN lock aur reminder. Sab ek jagah','#D6336F')+((np.nbs&&np.nbs.length)?tool('openNP','📚','Purani notebooks','Pehle wale notepad ki '+np.nbs.length+' notebook. Yaha dekho ya export karo','#8D52EA'):'')+tool('openDict','📖','Dictionary','English se Hindi aur Hindi se English. Offline, A se Z tak, internet ho to online bhi','#00897B')+tool('openDoubts','📸','Doubts','Jo question na aaye uska photo ya screenshot save karo, edit karke share karo','#2F6FEB')+tool('openRem','⏰','Study reminder','Time par ghanti, countdown aur phone ka alarm','#8D52EA')+tool('openExm','🎓','Exam countdown',(function(){var n=exmNext();return n?esc(n.name)+': '+diffDays(n.date,today())+' din bache':'Exam ki date daalo, din ginte jao'})(),'#E5484D')+tool('openFoc','⏱️','Focus timer','25 min padho, break lo. Roz ka focus time dikhega','#2F6FEB')+tool('openWk','📊','Weekly report','Is hafte ka lecture, best din aur subject-wise','#12C2A5')+tool('openRvl','🔁','Revision list','Padhe hue lecture 1, 3, 7, 15 din baad dohrao. Abhi baaki: '+rvItems().length,'#FF9F1C')+tool('openTorch','🔦','Torch','Dil ko chhuo, torch on ya off','#FF4D8D')+tool('openTpls','🎨','Templates','App ka poora design badlo. Data aur tools wahi rahenge','#6F55F5')}
+function screenTools(){return tool('openQT','⚡','Quick Tools','Prime, LCM/HCF, BODMAS, Age, Triplet, Ratio aur 29 tools aur. Number daalo, jawab pao','#009688')+tool('openEN','📓','Notepad','Notes, checklist, draw, photo, templates, PIN lock aur reminder. Sab ek jagah','#D6336F')+((np.nbs&&np.nbs.length)?tool('openNP','📚','Purani notebooks','Pehle wale notepad ki '+np.nbs.length+' notebook. Yaha dekho ya export karo','#8D52EA'):'')+tool('openDict','📖','Dictionary','English se Hindi aur Hindi se English. Offline, A se Z tak, internet ho to online bhi','#00897B')+tool('openDoubts','📸','Doubts','Jo question na aaye uska photo ya screenshot save karo, edit karke share karo','#2F6FEB')+tool('openRem','⏰','Study reminder','Time par ghanti, countdown aur phone ka alarm','#8D52EA')+tool('openExm','🎓','Exam countdown',(function(){var n=exmNext();return n?esc(n.name)+': '+diffDays(n.date,today())+' din bache':'Exam ki date daalo, din ginte jao'})(),'#E5484D')+tool('openFoc','⏱️','Focus timer','25 min padho, break lo. Roz ka focus time dikhega','#2F6FEB')+tool('openWk','📊','Weekly report','Is hafte ka lecture, best din aur subject-wise','#12C2A5')+tool('openRvl','🔁','Revision list','Padhe hue lecture 1, 3, 7, 15 din baad dohrao. Abhi baaki: '+rvItems().length,'#FF9F1C')+tool('openTorch','🔦','Torch','Dil ko chhuo, torch on ya off','#FF4D8D')+tool('openTpls','🎨','Templates','App ka poora design badlo. Data aur tools wahi rahenge','#6F55F5')}
 
 var FTXT=`# Algebra|🔢|#6F55F5
 ## Identities|1
@@ -3696,22 +3698,7 @@ function qtHome(){var h='';
  return h}
 var QKN=[['1','2','3','/'],['4','5','6',','],['7','8','9','.'],['C','0','⌫']];
 var QKE=[['1','2','3','÷'],['4','5','6','×'],['7','8','9','−'],['(','0',')','+'],['.','^','C','⌫']];
-function qtScreen(k){var d=QTD[k],h='<div class="qts" style="--c:'+d.c+'"><div class="qtin"><div class="qtbig">'+d.e+'</div>';
- if(d.mode==='date'){var pv=(qt.v||'').split('-'),ty=+today().slice(0,4),op=function(id,lab,arr,sel){return '<select class="qtsel" id="'+id+'" aria-label="'+lab+'"><option value="">'+lab+'</option>'+arr.map(function(a){return '<option value="'+a[0]+'"'+(String(sel)===String(a[0])?' selected':'')+'>'+a[1]+'</option>'}).join('')+'</select>'},dl=[],ml=[],yl=[],i2;
-  for(i2=1;i2<=31;i2++)dl.push([i2,i2]);['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].forEach(function(m,j){ml.push([j+1,m])});for(i2=ty;i2>=1950;i2--)yl.push([i2,i2]);
-  h+='<div class="qtdt">'+op('qtdd','Din',dl,+pv[2]||'')+op('qtmm','Mahina',ml,+pv[1]||'')+op('qtyy','Saal',yl,+pv[0]||'')+'</div>'}
- else h+='<div class="qtinp'+(qt.v?'':' ph')+'" id="qtv" role="textbox" aria-readonly="true">'+(qt.v?esc(qt.v):esc(d.ph))+'</div>';
- h+='</div>';
- if(qt.res)h+='<div class="qtres">'+qt.res+'</div>';
- h+='<div class="qtsp"></div>';
- if(d.mode!=='date'){var K=d.mode==='expr'?QKE:QKN;h+='<div class="qtkp">';
-  K.forEach(function(r){h+='<div class="qtkr" style="grid-template-columns:repeat('+r.length+',1fr)">';r.forEach(function(x){h+='<button class="qtk'+(x==='C'?' cl':x==='⌫'?' bk':'')+'" data-act="qk" data-v="'+x+'" aria-label="'+(x==='⌫'?'Mitao':x)+'">'+x+'</button>'});h+='</div>'});
-  h+='</div>'}
- return h+'<button class="qtgo" data-act="qtc">CALCULATE</button></div>'}
 function screenQT(){var c=cur();return c.k&&QTD[c.k]?qtScreen(c.k):qtHome()}
-function qtKey(x){var c=cur(),d=c&&QTD[c.k];if(!d)return;
- if(x==='C')qt.v='';else if(x==='⌫')qt.v=qt.v.slice(0,-1);else{if(qt.v.length>=60){toast('Itna bada nahi chalega');return}qt.v+=x}
- qt.res='';render()}
 /* helpers */
 function qN(x){if(!isFinite(x))return String(x);var s=(+x.toPrecision(12)).toString();return s.indexOf('e')>-1?(+x).toExponential(6):s}
 function qG(a,b){while(b){var t=a%b;a=b;b=t}return a}
@@ -3722,6 +3709,7 @@ function qIsP(n){if(n<2)return false;if(n<4)return true;if(n%2===0||n%3===0)retu
 function qInt(){var m=qt.v.replace(/[^\d]/g,'');if(!m)return null;var n=Number(m);if(!isFinite(n)||n>9e15||m.length>16)return NaN;return n}
 function qFracStr(n,d){var g=qG(Math.abs(n),Math.abs(d))||1;return (n/g)+' / '+(d/g)}
 function qCalc(k){var v=qt.v.trim(),n,a,i,r;
+ var z2=qCalc2(k);if(z2!==null)return z2;
  if(k==='age'){var g=function(id){var e=document.getElementById(id);return e?+e.value:0},D0=g('qtdd'),M0=g('qtmm'),Y0=g('qtyy');
   if(!D0||!M0||!Y0){qt.v=(Y0||'')+'-'+(M0||'')+'-'+(D0||'');return 'Din, mahina aur saal teeno chuno.'}
   var val=Y0+'-'+('0'+M0).slice(-2)+'-'+('0'+D0).slice(-2);qt.v=val;
@@ -3789,6 +3777,195 @@ function qCalc(k){var v=qt.v.trim(),n,a,i,r;
    ln.push('Total kaam (LCM) = '+LL+' unit');ef.forEach(function(e,j){ln.push('Efficiency '+'ABCDEFG'[j]+' = '+e+' unit/din')});ln.push('Sab milkar = '+es+' unit/din')}
   return qBox(['Sab milkar kaam: <b>'+qN(tt)+' din</b>'].concat(ln))}
  return ''}
+/* ===== Quick Tools 2 (naye tools) ===== */
+var QKD=[['1','2','3'],['4','5','6'],['7','8','9'],['AC','0','⌫']];
+var QKH=[['7','8','9','A'],['4','5','6','B'],['1','2','3','C'],['0','D','E','F'],['AC','⌫']];
+var QKR=[['I','V','X'],['L','C','D'],['M','AC','⌫']];
+Object.assign(QTD,{
+ tbl:{n:'Table / Pahade',t:'Table / Pahade',e:'✖️',c:'#00897B',ph:'Ex: 7 ya 7, 20 (7 ka pahada, 20 tak)',mode:'num'},
+ sql:{n:'Square & Cube List',t:'Square & Cube List',e:'🔢',c:'#5E35B1',ph:'Range likho, jaise 10, 30 (khali = 1 se)',mode:'num',auto:1,opts:[['sq','Squares'],['cu','Cubes'],['qz','Quiz']]},
+ pct:{n:'Percentage Tools',t:'Percentage Tools',e:'📊',c:'#3949AB',ph:'Ex: 80, 100',mode:'num',opts:[['chg','% Badlav'],['of','% of Number'],['is','Kitna %'],['inc','% Badhao'],['dec','% Ghatao']],
+  phm:{chg:'Purana, Naya (jaise 80, 100)',of:'Percent, Number (jaise 15, 200)',is:'A, B (jaise 30, 120)',inc:'Number, Percent (jaise 200, 15)',dec:'Number, Percent (jaise 200, 15)'}},
+ pl:{n:'Profit / Loss',t:'Profit, Loss & Discount',e:'💹',c:'#2E9B5F',ph:'CP, SP (jaise 400, 500)',mode:'num',opts:[['pl','CP, SP'],['sp','SP (Profit)'],['ls','SP (Loss)'],['cp','CP (Profit)'],['cl','CP (Loss)'],['dis','Discount']],
+  phm:{pl:'CP, SP (jaise 400, 500)',sp:'CP, Profit % (jaise 400, 25)',ls:'CP, Loss % (jaise 400, 10)',cp:'SP, Profit % (jaise 500, 25)',cl:'SP, Loss % (jaise 360, 10)',dis:'Marked price, Discount % (jaise 1000, 20)'}},
+ avg:{n:'Average & Median',t:'Average, Median & Mode',e:'📈',c:'#F4511E',ph:'Ex: 12, 15, 15, 20, 28',mode:'num'},
+ pnc:{n:'Permutation / Combination',t:'nPr & nCr',e:'🎲',c:'#8E24AA',ph:'n, r likho, jaise 8, 3',mode:'num'},
+ nsys:{n:'Number System',t:'Number System Converter',e:'💻',c:'#1E88E5',ph:'Number likho',mode:'num',opts:[['10','Decimal'],['2','Binary'],['8','Octal'],['16','Hex']],
+  kp:function(o){return o==='16'?QKH:QKD}},
+ rom:{n:'Roman Numerals',t:'Roman Numeral Converter',e:'🏛️',c:'#6D4C41',ph:'Number likho (1 se 3999)',mode:'num',opts:[['n2r','Number → Roman'],['r2n','Roman → Number']],
+  phm:{n2r:'Number likho (1 se 3999)',r2n:'Roman likho, jaise XIV'},kp:function(o){return o==='r2n'?QKR:QKD}},
+ ser:{n:'Series (AP / GP)',t:'Series (AP / GP)',e:'🪜',c:'#009688',ph:'a, d, n (jaise 2, 3, 10)',mode:'num',opts:[['ap','AP'],['gp','GP']],
+  phm:{ap:'Pehla, Antar d, n (jaise 2, 3, 10)',gp:'Pehla, Ratio r, n (jaise 2, 3, 6)'}},
+ mens:{n:'Mensuration',t:'Mensuration',e:'📏',c:'#E53935',ph:'Radius likho',mode:'num',opts:[['circ','Circle'],['rect','Rectangle'],['sqr','Square'],['tri','Triangle'],['cub','Cuboid'],['cube','Cube'],['cyl','Cylinder'],['cone','Cone'],['sph','Sphere']],
+  phm:{circ:'Radius r',rect:'Length, Breadth',sqr:'Side a',tri:'Base, Height (ya 3 sides)',cub:'Length, Breadth, Height',cube:'Side a',cyl:'Radius, Height',cone:'Radius, Height',sph:'Radius r'}},
+ ddiff:{n:'Date Difference',t:'Date Difference',e:'📆',c:'#E91E63',ph:'',mode:'ddiff'},
+ dfind:{n:'Day Finder',t:'Day Finder',e:'🗓️',c:'#1E88E5',ph:'',mode:'dfind'},
+ unit:{n:'Unit Converter',t:'Unit Converter',e:'🔁',c:'#00897B',ph:'Value likho, jaise 5',mode:'unit',opts:[['len','Length'],['wt','Weight'],['tmp','Temp'],['area','Area'],['vol','Volume'],['tim','Time'],['spd','Speed'],['dat','Data']]},
+ tip:{n:'Tip & Split Bill',t:'Tip & Split Bill',e:'🧾',c:'#F4511E',ph:'Bill, Tip %, Log (jaise 1200, 10, 4)',mode:'num'},
+ rand:{n:'Random / Dice / Coin',t:'Random / Dice / Coin',e:'🎰',c:'#8E24AA',ph:'Min, Max (jaise 1, 100)',mode:'num',opts:[['n','Number'],['d','Dice'],['c','Coin']],
+  phm:{n:'Min, Max (jaise 1, 100)',d:'Kitne dice? (jaise 2, khali = 1)',c:'Kitne coin? (jaise 3, khali = 1)'}},
+ pomo:{n:'Study Timer (Pomodoro)',t:'Study Timer',e:'🍅',c:'#E5484D',ph:'',mode:'num',go:'foc'},
+ p2m:{n:'Percentage ↔ Marks',t:'Percentage ↔ Marks',e:'🎯',c:'#3949AB',ph:'Mile hue, Total (jaise 156, 200)',mode:'num',opts:[['m2p','Marks → %'],['p2m','% → Marks']],
+  phm:{m2p:'Mile hue marks, Total (jaise 156, 200)',p2m:'Percent, Total marks (jaise 78, 200)'}},
+ tgt:{n:'Target Calculator',t:'Target Calculator',e:'🏹',c:'#2E9B5F',ph:'Total, Mile hue, Target % (jaise 200, 90, 75)',mode:'num',opts:[['m','Marks'],['q','Sawal']],
+  phm:{m:'Total, Mile hue, Target % (jaise 200, 90, 75)',q:'Total sawal, Marks/sawal, Target, Negative (jaise 100, 2, 120, 0.5)'}},
+ fsh:{n:'Formula Sheet',t:'Formula Sheet',e:'📐',c:'#8E24AA',ph:'',mode:'num',go:'formulas'},
+ wc:{n:'Word Counter',t:'Word Counter',e:'📝',c:'#6D4C41',ph:'',mode:'text'}
+});
+QTG.push(['Pahade aur Lists',['tbl','sql']],['Maths aur Reasoning',['pct','pl','avg','pnc','nsys','rom','ser','mens']],['Roz ke kaam',['ddiff','dfind','unit','tip','rand']],['Padhai ke tools',['pomo','p2m','tgt','fsh','wc']]);
+var QUN={
+ len:[['mm',.001],['cm',.01],['m',1],['km',1000],['inch',.0254],['foot',.3048],['yard',.9144],['mile',1609.344]],
+ wt:[['mg',1e-6],['g',.001],['kg',1],['quintal',100],['tonne',1000],['pound',.45359237],['ounce',.028349523125]],
+ tmp:[['°C',0],['°F',0],['K',0]],
+ area:[['cm²',1e-4],['m²',1],['sq foot',.09290304],['sq yard',.83612736],['hectare',1e4],['acre',4046.8564224],['km²',1e6]],
+ vol:[['ml',.001],['litre',1],['m³',1000],['gallon (US)',3.785411784],['cup (250 ml)',.25]],
+ tim:[['second',1],['minute',60],['hour',3600],['day',86400],['week',604800],['year',31536000]],
+ spd:[['m/s',1],['km/h',1/3.6],['mph',.44704],['knot',.514444]],
+ dat:[['bit',.125],['byte',1],['KB',1024],['MB',1048576],['GB',1073741824],['TB',1099511627776]]};
+function qOpt(k){var d=QTD[k];return qt.o||(d&&d.opts?d.opts[0][0]:'')}
+function qtOpts(d){if(!d.opts)return '';var o=qt.o||d.opts[0][0];
+ return '<div class="qtopt">'+d.opts.map(function(x){return '<button class="qtch'+(x[0]===o?' on':'')+'" data-act="qopt" data-v="'+x[0]+'">'+esc(x[1])+'</button>'}).join('')+'</div>'}
+function qtPh(d){var o=qt.o||(d.opts?d.opts[0][0]:'');return (d.phm&&d.phm[o])||d.ph}
+function qtDateSel(pf,val,y0,y1){var pv=(val||'').split('-'),op=function(id,lab,arr,sel){return '<select class="qtsel" id="'+id+'" aria-label="'+lab+'"><option value="">'+lab+'</option>'+arr.map(function(a){return '<option value="'+a[0]+'"'+(String(sel)===String(a[0])?' selected':'')+'>'+a[1]+'</option>'}).join('')+'</select>'},dl=[],ml=[],yl=[],i2;
+ for(i2=1;i2<=31;i2++)dl.push([i2,i2]);['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].forEach(function(m,j){ml.push([j+1,m])});for(i2=y1;i2>=y0;i2--)yl.push([i2,i2]);
+ var s=pf?'2':'';return '<div class="qtdt">'+op(pf?'qtd2':'qtdd','Din',dl,+pv[2]||'')+op(pf?'qtm2':'qtmm','Mahina',ml,+pv[1]||'')+op(pf?'qty2':'qtyy','Saal',yl,+pv[0]||'')+'</div>'}
+var QUD={len:[3,2],wt:[2,1],tmp:[0,1],area:[1,5],vol:[1,0],tim:[3,2],spd:[1,0],dat:[3,2]};
+function qUF(){var d=QUD[qOpt('unit')]||[0,1];return [qt.f===undefined?d[0]:qt.f,qt.t===undefined?d[1]:qt.t]}
+function qUn(x){var a=Math.abs(x);return (a!==0&&(a<1e-4||a>=1e12))?x.toExponential(4):qN(x)}
+function qM(x){return String(+x.toFixed(4))}
+function qtUnitSel(){var u=QUN[qOpt('unit')],ft=qUF(),f=ft[0],t=ft[1],op=function(id,sel){return '<select class="qtsel" id="'+id+'">'+u.map(function(a,i){return '<option value="'+i+'"'+(i===sel?' selected':'')+'>'+a[0]+'</option>'}).join('')+'</select>'};
+ return '<div class="qtdt2">'+op('qtf',f)+'<span class="qtarr">→</span>'+op('qtt',t)+'</div>'}
+function qzNew(sc,tot){var r=Math.random(),t=r<.3?'s':r<.55?'c':r<.8?'r':'q',n,q,a;
+ if(t==='s'){n=2+Math.floor(Math.random()*34);q=n+'²';a=n*n}
+ else if(t==='c'){n=2+Math.floor(Math.random()*14);q=n+'³';a=n*n*n}
+ else if(t==='r'){n=2+Math.floor(Math.random()*34);q='√'+(n*n);a=n}
+ else{n=2+Math.floor(Math.random()*14);q='∛'+(n*n*n);a=n}
+ return {q:q,a:a,sc:sc,tot:tot}}
+function qtScreen(k){var d=QTD[k],m=d.mode,h='<div class="qts" style="--c:'+d.c+'"><div class="qtin"><div class="qtbig">'+d.e+'</div>'+qtOpts(d),ty=+today().slice(0,4);
+ if(m==='date')h+=qtDateSel('',qt.v,1950,ty);
+ else if(m==='dfind')h+=qtDateSel('',qt.v,1900,ty+80);
+ else if(m==='ddiff')h+='<div class="qtlb">Pehli date</div>'+qtDateSel('',qt.v,1950,ty+30)+'<div class="qtlb">Dusri date</div>'+qtDateSel(1,qt.v2,1950,ty+30);
+ else if(m==='text')h+='<textarea class="qtta" id="qtta" placeholder="Yaha text likho ya paste karo">'+esc(qt.v||'')+'</textarea>';
+ else{
+  if(m==='unit')h+=qtUnitSel();
+  if(k==='sql'&&qOpt(k)==='qz'){if(!qt.qz)qt.qz=qzNew(0,0);h+='<div class="qtq">'+esc(qt.qz.q)+' = ?</div><div class="qtlb">Score: '+qt.qz.sc+' / '+qt.qz.tot+'</div>'}
+  h+='<div class="qtinp'+(qt.v?'':' ph')+'" id="qtv" role="textbox" aria-readonly="true">'+(qt.v?esc(qt.v):esc(qtPh(d)))+'</div>'}
+ h+='</div>';
+ if(qt.res)h+='<div class="qtres">'+qt.res+'</div>';
+ h+='<div class="qtsp"></div>';
+ if(!/^(date|dfind|ddiff|text)$/.test(m)){var K=d.kp?d.kp(qOpt(k)):(m==='expr'?QKE:QKN);h+='<div class="qtkp">';
+  K.forEach(function(r){h+='<div class="qtkr" style="grid-template-columns:repeat('+r.length+',1fr)">';r.forEach(function(x){var clr=x==='AC'||(x==='C'&&!d.kp);h+='<button class="qtk'+(clr?' cl':x==='⌫'?' bk':'')+'" data-act="qk" data-v="'+x+'" aria-label="'+(x==='⌫'?'Mitao':x==='AC'?'Clear':x)+'">'+x+'</button>'});h+='</div>'});
+  h+='</div>'}
+ return h+'<button class="qtgo" data-act="qtc">CALCULATE</button></div>'}
+function qtKey(x){var c=cur(),d=c&&QTD[c.k];if(!d)return;
+ if(x==='AC'||(x==='C'&&!d.kp))qt.v='';else if(x==='⌫')qt.v=qt.v.slice(0,-1);else{if(qt.v.length>=60){toast('Itna bada nahi chalega');return}qt.v+=x}
+ qt.res='';render()}
+function qF2(x){return Number(x.toFixed(2)).toLocaleString('en-IN')}
+function qDate(idd,imm,iyy){var g=function(id){var e=document.getElementById(id);return e?+e.value:0},D=g(idd),M=g(imm),Y=g(iyy);return {D:D,M:M,Y:Y,s:(Y||'')+'-'+(M||'')+'-'+(D||''),ok:!!(D&&M&&Y)}}
+function qDays(y1,m1,d1,y2,m2,d2){var a=new Date(y1,m1-1,d1),b=new Date(y2,m2-1,d2);return Math.round((Date.UTC(b.getFullYear(),b.getMonth(),b.getDate())-Date.UTC(a.getFullYear(),a.getMonth(),a.getDate()))/864e5)}
+function qRoman(n){var v=[[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']],s='';v.forEach(function(p){while(n>=p[0]){s+=p[1];n-=p[0]}});return s}
+function qUnRoman(s){var m={I:1,V:5,X:10,L:50,C:100,D:500,M:1000},t=0,i;for(i=0;i<s.length;i++){var c=m[s[i]],nx=m[s[i+1]]||0;t+=c<nx?-c:c}return t}
+function qBig(n){return String(n)}
+function qCalc2(k){
+ var v=qt.v.trim(),a,i,o=qOpt(k),n,r;
+ if(k==='wc'){var ta=document.getElementById('qtta');v=ta?ta.value:qt.v;qt.v=v;
+  if(!v.trim())return 'Pehle kuch text likho ya paste karo.';
+  var words=v.trim().split(/\s+/).filter(Boolean).length,ch=v.length,chn=v.replace(/\s/g,'').length,sen=(v.match(/[^.!?।]+[.!?।]+|[^.!?।]+$/g)||[]).filter(function(x){return x.trim()}).length,par=v.split(/\n\s*\n/).filter(function(x){return x.trim()}).length,lin=v.split('\n').length,mins=words/200;
+  return qBox(['Words: <b>'+words+'</b>','Characters: <b>'+ch+'</b>','Characters (bina space): '+chn,'Sentences: '+sen,'Paragraphs: '+par,'Lines: '+lin,mins<1?'Padhne me lagbhag: '+Math.max(1,Math.round(mins*60))+' second':'Padhne me lagbhag: '+Math.round(mins*10)/10+' minute'])}
+ if(k==='ddiff'){var A=qDate('qtdd','qtmm','qtyy'),B=qDate('qtd2','qtm2','qty2');qt.v=A.s;qt.v2=B.s;
+  if(!A.ok||!B.ok)return 'Dono dates ke din, mahina aur saal chuno.';
+  var chk=function(x){var t=new Date(x.Y,x.M-1,x.D);return t.getDate()===x.D};if(!chk(A)||!chk(B))return 'Koi date sahi nahi hai (is mahine me itne din nahi hote).';
+  var da=new Date(A.Y,A.M-1,A.D),db=new Date(B.Y,B.M-1,B.D),sw=da>db;if(sw){var tt=da;da=db;db=tt}
+  var y=db.getFullYear()-da.getFullYear(),mo=db.getMonth()-da.getMonth(),dd=db.getDate()-da.getDate();
+  if(dd<0){mo--;dd+=new Date(db.getFullYear(),db.getMonth(),0).getDate()}if(mo<0){y--;mo+=12}
+  var days=qDays(da.getFullYear(),da.getMonth()+1,da.getDate(),db.getFullYear(),db.getMonth()+1,db.getDate());
+  if(days===0)return qBox(['Dono date ek hi hain. Fark = <b>0 din</b>']);
+  return qBox(['Fark: <b>'+y+' saal, '+mo+' mahine, '+dd+' din</b>','Kul din: '+days.toLocaleString('en-IN'),'Kul hafte: '+Math.floor(days/7).toLocaleString('en-IN')+' aur '+(days%7)+' din','Kul mahine: '+(y*12+mo)])}
+ if(k==='dfind'){var Q=qDate('qtdd','qtmm','qtyy');qt.v=Q.s;if(!Q.ok)return 'Din, mahina aur saal teeno chuno.';
+  var dq=new Date(Q.Y,Q.M-1,Q.D);if(dq.getDate()!==Q.D)return 'Ye date sahi nahi hai (is mahine me itne din nahi hote).';
+  var wd=dq.getDay(),H=['Ravi','Som','Mangal','Budh','Guru','Shukra','Shani'],E=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],leap=(Q.Y%4===0&&Q.Y%100!==0)||Q.Y%400===0,doy=qDays(Q.Y,1,1,Q.Y,Q.M,Q.D)+1,td=qDays(+today().slice(0,4),+today().slice(5,7),+today().slice(8,10),Q.Y,Q.M,Q.D);
+  return qBox(['Din: <b>'+H[wd]+'</b> · '+E[wd],'Saal ka din number: '+doy,leap?'Ye saal leap year hai ✅':'Ye saal leap year nahi hai',td===0?'Ye date aaj hi hai':td>0?'Aaj se '+td+' din baad':'Aaj se '+(-td)+' din pehle'])}
+ if(k==='unit'){var fe=document.getElementById('qtf'),te=document.getElementById('qtt');if(fe)qt.f=+fe.value;if(te)qt.t=+te.value;
+  a=qNums(v);if(!a.length)return 'Pehle value likho.';var u=QUN[o],ft=qUF(),f=ft[0],t=ft[1],x=a[0],out=[];
+  if(o==='tmp'){var C=f===0?x:f===1?(x-32)*5/9:x-273.15;if(C<-273.15)return 'Isse kam temperature nahi hota (−273.15 °C se neeche).';
+   var vals=[C,C*9/5+32,C+273.15];out.push(qUn(x)+' '+u[f][0]+' = <b>'+qUn(vals[t])+' '+u[t][0]+'</b>');out.push('');u.forEach(function(p,j){out.push(p[0]+': '+qUn(vals[j]))});return qBox(out)}
+  var base=x*u[f][1];out.push(qUn(x)+' '+u[f][0]+' = <b>'+qUn(base/u[t][1])+' '+u[t][0]+'</b>');out.push('');
+  u.forEach(function(p,j){if(j!==f)out.push(p[0]+': '+qUn(base/p[1]))});return qBox(out)}
+ if(k==='tbl'){a=qNums(v);if(!a.length)return 'Pehle number likho.';n=a[0];var up=a.length>1?Math.round(a[1]):20;if(!(up>=1))return 'Kitne tak ka pahada chahiye? 1 se 100 ke beech likho.';if(up>100)up=100;
+  var L=[];for(i=1;i<=up;i++)L.push(qN(n)+' × '+i+' = <b>'+qN(n*i)+'</b>');return qBox(L)}
+ if(k==='sql'){
+  if(o==='qz'){if(!v)return 'Pehle apna jawab likho.';var cz=qt.qz||qzNew(0,0),ans=Number(v),ok=ans===cz.a,sc=cz.sc+(ok?1:0),tot=cz.tot+1;qt.qz=qzNew(sc,tot);qt.v='';
+   return qBox([ok?'✅ Sahi!':'❌ Galat!','Sahi jawab: <b>'+cz.q+' = '+cz.a+'</b>','Score: '+sc+' / '+tot])}
+  a=qNums(v);var from=1,to=o==='cu'?30:50;if(a.length===1)to=Math.round(a[0]);if(a.length>1){from=Math.round(a[0]);to=Math.round(a[1])}
+  if(from<1||to<from||to-from>99)return 'Range sahi likho (zyada se zyada 100 numbers), jaise 10, 30.';
+  var LL=[];for(i=from;i<=to;i++)LL.push(o==='cu'?i+'³ = <b>'+(i*i*i)+'</b>':i+'² = <b>'+(i*i)+'</b>');return qBox(LL)}
+ if(k==='pct'){a=qNums(v);if(a.length<2)return 'Do number likho, comma se alag karke.';var p0=a[0],p1=a[1];
+  if(o==='chg'){if(p0===0)return 'Purana number 0 nahi ho sakta.';var ch2=(p1-p0)/p0*100;if(ch2===0)return qBox(['Koi badlav nahi: <b>0%</b>']);
+   return qBox([p0+' se '+p1+' tak','Badlav: <b>'+qN(Math.abs(ch2))+'%</b> '+(ch2>0?'badha':'ghata'),'Farak = '+qN(Math.abs(p1-p0))])}
+  if(o==='of')return qBox([qN(p1)+' ka '+qN(p0)+'% = <b>'+qN(p1*p0/100)+'</b>']);
+  if(o==='is'){if(p1===0)return 'B number 0 nahi ho sakta.';return qBox([qN(p0)+', '+qN(p1)+' ka percent = <b>'+qN(p0/p1*100)+'%</b>'])}
+  if(o==='inc')return qBox([qN(p0)+' me '+qN(p1)+'% badhane par','Naya number = <b>'+qN(p0*(1+p1/100))+'</b>','Badhotri = '+qN(p0*p1/100)]);
+  if(o==='dec'){if(p1>100)return 'Percent 100 se zyada nahi ghata sakte.';return qBox([qN(p0)+' me '+qN(p1)+'% ghatane par','Naya number = <b>'+qN(p0*(1-p1/100))+'</b>','Kami = '+qN(p0*p1/100)])}}
+ if(k==='pl'){a=qNums(v);if(a.length<2)return 'Do number likho, comma se alag karke.';var x0=a[0],x1=a[1];if(x0<=0)return 'Pehla number 0 se bada hona chahiye.';
+  if(o==='pl'){var df=x1-x0;if(df===0)return qBox(['Na profit, na loss. CP = SP']);return qBox([df>0?'Profit: <b>'+qN(df)+'</b>':'Loss: <b>'+qN(-df)+'</b>',(df>0?'Profit':'Loss')+' % = <b>'+qN(Math.abs(df)/x0*100)+'%</b>','SP = CP ka '+qN(x1/x0*100)+'%'])}
+  if(o==='sp')return qBox(['CP = '+qN(x0)+', Profit = '+qN(x1)+'%','SP = <b>'+qN(x0*(1+x1/100))+'</b>','Profit = '+qN(x0*x1/100)]);
+  if(o==='ls'){if(x1>100)return 'Loss 100% se zyada nahi ho sakta.';return qBox(['CP = '+qN(x0)+', Loss = '+qN(x1)+'%','SP = <b>'+qN(x0*(1-x1/100))+'</b>','Loss = '+qN(x0*x1/100)])}
+  if(o==='cp')return qBox(['SP = '+qN(x0)+', Profit = '+qN(x1)+'%','CP = <b>'+qN(x0*100/(100+x1))+'</b>']);
+  if(o==='cl'){if(x1>=100)return 'Loss 100% se kam likho.';return qBox(['SP = '+qN(x0)+', Loss = '+qN(x1)+'%','CP = <b>'+qN(x0*100/(100-x1))+'</b>'])}
+  if(o==='dis'){if(x1>100)return 'Discount 100% se zyada nahi ho sakta.';return qBox(['Marked price = '+qN(x0)+', Discount = '+qN(x1)+'%','Selling price = <b>'+qN(x0*(1-x1/100))+'</b>','Bachat = '+qN(x0*x1/100)])}}
+ if(k==='avg'){a=qNums(v);if(a.length<2)return 'Kam se kam 2 numbers likho, comma se alag karke.';
+  var s=a.slice().sort(function(p,q){return p-q}),sum=a.reduce(function(p,q){return p+q},0),med=s.length%2?s[(s.length-1)/2]:(s[s.length/2-1]+s[s.length/2])/2,cnt={},best=0;
+  a.forEach(function(z){cnt[z]=(cnt[z]||0)+1;if(cnt[z]>best)best=cnt[z]});var modes=Object.keys(cnt).filter(function(z){return cnt[z]===best}).map(Number).sort(function(p,q){return p-q});
+  return qBox(['Total numbers: '+a.length+' (sorted: '+s.map(qN).join(', ')+')','Sum = '+qN(sum),'Average (Mean) = <b>'+qN(sum/a.length)+'</b>','Median = <b>'+qN(med)+'</b>',best===1?'Mode: koi nahi (sab alag hain)':'Mode = <b>'+modes.map(qN).join(', ')+'</b>','Range = '+qN(s[s.length-1]-s[0]),'Smallest = '+qN(s[0])+', Largest = '+qN(s[s.length-1])])}
+ if(k==='pnc'){a=qNums(v);if(a.length<2)return 'Do number likho: n, r jaise 8, 3.';var nn=a[0],rr=a[1];if(nn%1||rr%1||nn<0||rr<0)return 'Sirf poore positive numbers likho.';if(rr>nn)return 'r, n se bada nahi ho sakta.';if(nn>200)return 'n 200 tak hi chalega.';
+  var f=function(m){var q=BigInt(1);for(var j=2;j<=m;j++)q*=BigInt(j);return q},P=f(nn)/f(nn-rr),Cc=P/f(rr);
+  return qBox([nn+'! = <b>'+f(nn)+'</b>','P('+nn+', '+rr+') = <b>'+P+'</b>','C('+nn+', '+rr+') = <b>'+Cc+'</b>','P = n! / (n − r)!   C = P / r!'])}
+ if(k==='nsys'){if(!v)return 'Pehle number likho.';var base=+o,s2=v.toUpperCase(),dg='0123456789ABCDEF',val=BigInt(0),bb=BigInt(base);
+  for(i=0;i<s2.length;i++){var dv=dg.indexOf(s2[i]);if(dv<0||dv>=base)return qBox(['Is number me galat digit hai: <b>'+esc(s2[i])+'</b>',base===2?'Binary me sirf 0 aur 1 chalta hai.':base===8?'Octal me 0 se 7 tak chalta hai.':'Sahi digits likho.']);val=val*bb+BigInt(dv)}
+  return qBox(['Decimal: <b>'+val.toString(10)+'</b>','Binary: <b>'+val.toString(2)+'</b>','Octal: <b>'+val.toString(8)+'</b>','Hexadecimal: <b>'+val.toString(16).toUpperCase()+'</b>'])}
+ if(k==='rom'){if(!v)return 'Pehle likho.';
+  if(o==='n2r'){n=Number(v.replace(/[^\d]/g,''));if(!(n>=1&&n<=3999))return 'Roman me 1 se 3999 tak hi likhte hain.';return qBox([n+' = <b>'+qRoman(n)+'</b>'])}
+  var rs=v.toUpperCase();if(!/^[IVXLCDM]+$/.test(rs))return 'Sirf I, V, X, L, C, D, M likho.';var val2=qUnRoman(rs);if(qRoman(val2)!==rs)return qBox(['Ye sahi Roman number nahi hai.','Sahi rup: <b>'+qRoman(val2||1)+'</b>']);
+  return qBox([rs+' = <b>'+val2+'</b>'])}
+ if(k==='ser'){a=qNums(v);if(a.length<3)return 'Teen number likho: pehla, antar (ya ratio), n.';var a1=a[0],d1=a[1],nt=a[2];if(nt<1||nt%1||nt>1000)return 'n 1 se 1000 ke beech ka poora number hona chahiye.';
+  if(o==='ap'){var an=a1+(nt-1)*d1,sn=nt/2*(2*a1+(nt-1)*d1),T=[];for(i=0;i<Math.min(nt,8);i++)T.push(qN(a1+i*d1));
+   return qBox(['Series: '+T.join(', ')+(nt>8?', ...':''),'n-th term = <b>'+qN(an)+'</b>','Sum of n terms = <b>'+qN(sn)+'</b>','a<sub>n</sub> = a + (n − 1)d   S<sub>n</sub> = n/2 [2a + (n − 1)d]'])}
+  var gn=a1*Math.pow(d1,nt-1),gs=d1===1?a1*nt:a1*(Math.pow(d1,nt)-1)/(d1-1);if(!isFinite(gn)||!isFinite(gs))return 'Number bahut bada ho gaya. n ya ratio chhota rakho.';var T2=[];for(i=0;i<Math.min(nt,8);i++)T2.push(qN(a1*Math.pow(d1,i)));
+  var ln=['Series: '+T2.join(', ')+(nt>8?', ...':''),'n-th term = <b>'+qN(gn)+'</b>','Sum of n terms = <b>'+qN(gs)+'</b>'];if(Math.abs(d1)<1)ln.push('Infinite sum = <b>'+qN(a1/(1-d1))+'</b>');ln.push('a<sub>n</sub> = a r<sup>n−1</sup>   S<sub>n</sub> = a (r<sup>n</sup> − 1)/(r − 1)');return qBox(ln)}
+ if(k==='mens'){a=qNums(v);var need={circ:1,rect:2,sqr:1,tri:2,cub:3,cube:1,cyl:2,cone:2,sph:1}[o];if(a.length<need)return 'Is shape ke liye '+need+' number chahiye (comma se alag).';for(i=0;i<a.length;i++)if(!(a[i]>0))return 'Sab numbers 0 se bade likho.';var P=Math.PI,x=a[0],y=a[1],z=a[2],L=[];
+  if(o==='circ'){L=['Area = <b>'+qM(P*x*x)+'</b>','Circumference = <b>'+qM(2*P*x)+'</b>','Diameter = '+qM(2*x)]}
+  else if(o==='rect'){L=['Area = <b>'+qM(x*y)+'</b>','Perimeter = <b>'+qM(2*(x+y))+'</b>','Diagonal = '+qM(Math.sqrt(x*x+y*y))]}
+  else if(o==='sqr'){L=['Area = <b>'+qM(x*x)+'</b>','Perimeter = <b>'+qM(4*x)+'</b>','Diagonal = '+qM(x*Math.SQRT2)]}
+  else if(o==='tri'){if(a.length>=3){if(x+y<=z||x+z<=y||y+z<=x)return 'Ye 3 sides se triangle nahi banega.';var sp=(x+y+z)/2;L=['Area (Heron) = <b>'+qM(Math.sqrt(sp*(sp-x)*(sp-y)*(sp-z)))+'</b>','Perimeter = <b>'+qM(x+y+z)+'</b>']}else L=['Area = <b>'+qM(x*y/2)+'</b>']}
+  else if(o==='cub'){L=['Volume = <b>'+qM(x*y*z)+'</b>','Total surface area = <b>'+qM(2*(x*y+y*z+z*x))+'</b>','Lateral surface area = '+qM(2*z*(x+y)),'Diagonal = '+qM(Math.sqrt(x*x+y*y+z*z))]}
+  else if(o==='cube'){L=['Volume = <b>'+qM(x*x*x)+'</b>','Total surface area = <b>'+qM(6*x*x)+'</b>','Lateral surface area = '+qM(4*x*x),'Diagonal = '+qM(x*Math.sqrt(3))]}
+  else if(o==='cyl'){L=['Volume = <b>'+qM(P*x*x*y)+'</b>','Curved surface area = <b>'+qM(2*P*x*y)+'</b>','Total surface area = <b>'+qM(2*P*x*(x+y))+'</b>']}
+  else if(o==='cone'){var sl=Math.sqrt(x*x+y*y);L=['Volume = <b>'+qM(P*x*x*y/3)+'</b>','Slant height = '+qM(sl),'Curved surface area = <b>'+qM(P*x*sl)+'</b>','Total surface area = <b>'+qM(P*x*(x+sl))+'</b>']}
+  else{L=['Volume = <b>'+qM(4/3*P*x*x*x)+'</b>','Surface area = <b>'+qM(4*P*x*x)+'</b>']}
+  L.push('π ≈ 3.1416');return qBox(L)}
+ if(k==='tip'){a=qNums(v);if(a.length<2)return 'Kam se kam bill aur tip % likho (log optional).';var bl=a[0],tp=a[1],pp=a[2]||1;if(bl<=0||tp<0||pp<1||pp%1)return 'Bill 0 se bada, tip 0 ya zyada aur log poora number likho.';
+  var tv=bl*tp/100,tot=bl+tv;return qBox(['Tip: <b>₹'+qF2(tv)+'</b>','Total bill: <b>₹'+qF2(tot)+'</b>',pp>1?'Har ek ka hissa: <b>₹'+qF2(tot/pp)+'</b>':'Ek hi vyakti hai'])}
+ if(k==='rand'){a=qNums(v);
+  if(o==='n'){var mn=0,mx=0;if(a.length===1){mn=1;mx=Math.floor(a[0])}else if(a.length>=2){mn=Math.ceil(Math.min(a[0],a[1]));mx=Math.floor(Math.max(a[0],a[1]))}else return 'Min aur Max likho, jaise 1, 100.';if(mx<mn)return 'Range sahi likho.';
+   return qBox(['Random number: <b>'+(mn+Math.floor(Math.random()*(mx-mn+1)))+'</b>','Range: '+mn+' se '+mx,'Dobara dabao to naya number aayega'])}
+  var cn=a.length?Math.round(a[0]):1;if(!(cn>=1))cn=1;
+  if(o==='d'){if(cn>6)return 'Ek baar me 6 dice tak.';var fc=['⚀','⚁','⚂','⚃','⚄','⚅'],R=[],sm=0;for(i=0;i<cn;i++){var q=1+Math.floor(Math.random()*6);R.push(q);sm+=q}
+   return qBox(['<span style="font-size:42px">'+R.map(function(q){return fc[q-1]}).join(' ')+'</span>','Dice: <b>'+R.join(', ')+'</b>',cn>1?'Total = '+sm:'Ek dice'])}
+  if(cn>10)return 'Ek baar me 10 coin tak.';var hh=0,C2=[];for(i=0;i<cn;i++){var hd=Math.random()<.5;if(hd)hh++;C2.push(hd?'Heads':'Tails')}
+  return qBox(['<span style="font-size:42px">🪙</span>','<b>'+C2.join(', ')+'</b>',cn>1?'Heads: '+hh+', Tails: '+(cn-hh):'Dobara uchhalo'])}
+ if(k==='p2m'){a=qNums(v);if(a.length<2)return 'Do number likho, comma se alag karke.';
+  if(o==='m2p'){if(a[1]<=0)return 'Total marks 0 se bade likho.';if(a[0]>a[1])return 'Mile hue marks total se zyada nahi ho sakte.';var pc=a[0]/a[1]*100;
+   return qBox([qN(a[0])+' / '+qN(a[1])+' marks','Percentage = <b>'+qN(pc)+'%</b>',pc>=90?'Shandar! 🌟':pc>=75?'Bahut badhiya':pc>=60?'Achha hai':pc>=33?'Pass, aur mehnat karo':'Pass hone ke liye 33% chahiye'])}
+  if(a[0]<0||a[0]>100)return 'Percent 0 se 100 ke beech likho.';return qBox([qN(a[0])+'% of '+qN(a[1])+' marks','Marks = <b>'+qN(a[0]*a[1]/100)+'</b>'])}
+ if(k==='tgt'){a=qNums(v);
+  if(o==='m'){if(a.length<3)return 'Teen number likho: total, mile hue, target %.';var tm=a[0],gt=a[1],tp2=a[2];if(tm<=0||tp2<0||tp2>100||gt<0)return 'Total 0 se bada, target % 0 se 100 ke beech likho.';
+   var tg=Math.ceil(tm*tp2/100-1e-9),nd=tg-gt;if(nd<=0)return qBox(['Target marks: '+tg,'Aap target tak pahunch chuke ho ✅']);
+   if(nd>tm-gt)return qBox(['Target marks: '+tg,'Aur chahiye: <b>'+nd+'</b>','Itne marks bache hi nahi (bache: '+qN(tm-gt)+'). Target mushkil hai ❌']);
+   return qBox(['Target marks: '+tg,'Abhi tak: '+qN(gt),'Aur chahiye: <b>'+nd+'</b>','Bache hue marks me se '+qN(Math.round(nd/(tm-gt)*1000)/10)+'% lana hoga'])}
+  if(a.length<3)return 'Teen number likho: total sawal, marks/sawal, target (negative optional).';var T3=a[0],mk=a[1],tg2=a[2],ng=a[3]||0;if(T3<1||mk<=0||tg2<0||ng<0)return 'Numbers sahi likho.';
+  if(tg2>T3*mk)return 'Target total marks se zyada hai ('+qN(T3*mk)+').';var c=Math.ceil((tg2+T3*ng)/(mk+ng)-1e-9);
+  return qBox(['Target = '+qN(tg2)+' marks','Sab sawal attempt karo to kam se kam <b>'+c+'</b> sahi chahiye','Accuracy chahiye: '+qN(Math.round(c/T3*1000)/10)+'%',ng>0?'Har galat par −'+qN(ng)+' marks':'Negative marking nahi'])}
+ return null}
 /* BODMAS with steps */
 function qBod(src){var s=src.replace(/\s+/g,'').replace(/[*xX]/g,'×').replace(/\//g,'÷').replace(/-/g,'−'),T=[],i=0,m,re=/^(\d+\.?\d*|\.\d+)/;
  while(i<s.length){var ch=s[i];if(re.test(s.slice(i))){m=s.slice(i).match(re)[0];T.push(m);i+=m.length}else if('+−×÷^()'.indexOf(ch)>-1){T.push(ch);i++}else return 'Is character ka matlab nahi samjha: '+esc(ch);}
@@ -4239,7 +4416,7 @@ function dcRes(){
  m.slice(0,30).forEach(function(k){h+='<div class="card notr" style="margin-bottom:8px"><b style="font-size:20px">'+esc(k)+'</b><div style="margin-top:4px">'+dc.H[k].slice(0,12).map(function(w){return '<button class="chip2" data-act="dcOpen" data-w="'+esc(w)+'">'+esc(w)+'</button>'}).join(' ')+'</div></div>'});
  return h}
 function screenDict(){if(!dc.loaded&&!dc.busy&&!dc.err)dcLoad();
- var h='<div class="row2" style="margin-bottom:8px"><button class="btn '+(dc.dir==='e'?'pri':'ghost')+'" style="margin-top:0" data-act="dcDir" data-v="e">English → हिंदी</button><button class="btn '+(dc.dir==='h'?'pri':'ghost')+'" style="margin-top:0" data-act="dcDir" data-v="h">हिंदी → English</button></div>';
+ dc.dir='e';var h='';
  h+='<input class="inp notr" id="dcQ" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="'+(dc.dir==='e'?'Search: word, book, water...':'खोजो: पानी, किताब...')+'" value="'+esc(dc.q)+'">';
  if(dc.dir==='e'){h+='<div class="notr" style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0">';'abcdefghijklmnopqrstuvwxyz'.split('').forEach(function(l){h+='<button class="dt'+(dc.let===l&&!dc.q?' on':'')+'" style="min-width:34px" data-act="dcLet" data-v="'+l+'">'+l.toUpperCase()+'</button>'});h+='</div>'}
  h+='<div id="dcRes">'+dcRes()+'</div>';
@@ -5128,6 +5305,15 @@ LANGR.push([/^Is character ka matlab nahi samjha: (.*)$/,function(m){return 'इ
 LANGR.push([/^Rang (#?[0-9A-Fa-f]{6})$/,function(m){return 'रंग '+m[1]}]);
 LANGR.push([/^Offline dictionary me "(.*)" nahi mila\.$/,function(m){return 'ऑफ़लाइन शब्दकोश में "'+m[1]+'" नहीं मिला।'}]);
 
+Object.assign(LANGD,{"Pahade aur Lists": "पहाड़े और सूचियाँ", "Maths aur Reasoning": "गणित और रीज़निंग", "Roz ke kaam": "रोज़ के काम", "Padhai ke tools": "पढ़ाई के टूल्स", "Table / Pahade": "पहाड़ा (टेबल)", "Square & Cube List": "वर्ग और घन सूची", "Percentage Tools": "प्रतिशत टूल्स", "Profit / Loss": "लाभ / हानि", "Profit, Loss & Discount": "लाभ, हानि और छूट", "Average & Median": "औसत और माध्यिका", "Average, Median & Mode": "औसत, माध्यिका और बहुलक", "Permutation / Combination": "क्रमचय / संचय", "nPr & nCr": "nPr और nCr", "Number System Converter": "संख्या पद्धति कन्वर्टर", "Roman Numerals": "रोमन अंक", "Roman Numeral Converter": "रोमन अंक कन्वर्टर", "Series (AP / GP)": "श्रेणी (AP / GP)", "Mensuration": "क्षेत्रमिति", "Date Difference": "तारीख़ का अंतर", "Day Finder": "दिन खोजो", "Unit Converter": "इकाई कन्वर्टर", "Tip & Split Bill": "टिप और बिल बाँटो", "Random / Dice / Coin": "रैंडम / पासा / सिक्का", "Study Timer (Pomodoro)": "स्टडी टाइमर (पोमोडोरो)", "Study Timer": "स्टडी टाइमर", "Percentage ↔ Marks": "प्रतिशत ↔ अंक", "Target Calculator": "लक्ष्य कैलकुलेटर", "Formula Sheet": "सूत्र सूची", "Word Counter": "शब्द गिनती", "Squares": "वर्ग", "Cubes": "घन", "Quiz": "क्विज़", "% Badlav": "% बदलाव", "% of Number": "संख्या का %", "Kitna %": "कितना %", "% Badhao": "% बढ़ाओ", "% Ghatao": "% घटाओ", "SP (Profit)": "SP (लाभ)", "SP (Loss)": "SP (हानि)", "CP (Profit)": "CP (लाभ)", "CP (Loss)": "CP (हानि)", "Decimal": "दशमलव", "Binary": "द्विआधारी", "Octal": "अष्टाधारी", "Hex": "षोडश (Hex)", "Hexadecimal": "षोडशआधारी", "Number → Roman": "संख्या → रोमन", "Roman → Number": "रोमन → संख्या", "Length": "लंबाई", "Weight": "वज़न", "Temp": "तापमान", "Volume": "आयतन", "Dice": "पासा", "Coin": "सिक्का", "Marks → %": "अंक → %", "% → Marks": "% → अंक", "Marks": "अंक", "Ex: # ya #, # (# ka pahada, # tak)": "जैसे: # या #, # (# का पहाड़ा, # तक)", "Range likho, jaise #, # (khali = # se)": "रेंज लिखो, जैसे #, # (खाली = # से)", "Ex: #, #": "जैसे: #, #", "Purana, Naya (jaise #, #)": "पुराना, नया (जैसे #, #)", "Percent, Number (jaise #, #)": "प्रतिशत, संख्या (जैसे #, #)", "A, B (jaise #, #)": "A, B (जैसे #, #)", "Number, Percent (jaise #, #)": "संख्या, प्रतिशत (जैसे #, #)", "CP, SP (jaise #, #)": "CP, SP (जैसे #, #)", "CP, Profit % (jaise #, #)": "CP, लाभ % (जैसे #, #)", "CP, Loss % (jaise #, #)": "CP, हानि % (जैसे #, #)", "SP, Profit % (jaise #, #)": "SP, लाभ % (जैसे #, #)", "SP, Loss % (jaise #, #)": "SP, हानि % (जैसे #, #)", "Marked price, Discount % (jaise #, #)": "अंकित मूल्य, छूट % (जैसे #, #)", "Ex: #, #, #, #, #": "जैसे: #, #, #, #, #", "n, r likho, jaise #, #": "n, r लिखो, जैसे #, #", "Number likho": "नंबर लिखो", "Number likho (# se #)": "नंबर लिखो (# से #)", "Roman likho, jaise XIV": "रोमन लिखो, जैसे XIV", "a, d, n (jaise #, #, #)": "a, d, n (जैसे #, #, #)", "Pehla, Antar d, n (jaise #, #, #)": "पहला, अंतर d, n (जैसे #, #, #)", "Pehla, Ratio r, n (jaise #, #, #)": "पहला, अनुपात r, n (जैसे #, #, #)", "Radius likho": "त्रिज्या लिखो", "Radius r": "त्रिज्या r", "Length, Breadth": "लंबाई, चौड़ाई", "Side a": "भुजा a", "Base, Height (ya # sides)": "आधार, ऊँचाई (या # भुजाएँ)", "Length, Breadth, Height": "लंबाई, चौड़ाई, ऊँचाई", "Radius, Height": "त्रिज्या, ऊँचाई", "Value likho, jaise #": "मान लिखो, जैसे #", "Bill, Tip %, Log (jaise #, #, #)": "बिल, टिप %, लोग (जैसे #, #, #)", "Min, Max (jaise #, #)": "न्यूनतम, अधिकतम (जैसे #, #)", "Kitne dice? (jaise #, khali = #)": "कितने पासे? (जैसे #, खाली = #)", "Kitne coin? (jaise #, khali = #)": "कितने सिक्के? (जैसे #, खाली = #)", "Mile hue, Total (jaise #, #)": "मिले अंक, कुल (जैसे #, #)", "Mile hue marks, Total (jaise #, #)": "मिले अंक, कुल (जैसे #, #)", "Percent, Total marks (jaise #, #)": "प्रतिशत, कुल अंक (जैसे #, #)", "Total, Mile hue, Target % (jaise #, #, #)": "कुल, मिले अंक, लक्ष्य % (जैसे #, #, #)", "Total sawal, Marks/sawal, Target, Negative (jaise #, #, #, #)": "कुल सवाल, अंक/सवाल, लक्ष्य, नेगेटिव (जैसे #, #, #, #)", "Yaha text likho ya paste karo": "यहाँ टेक्स्ट लिखो या पेस्ट करो", "Pehli date": "पहली तारीख़", "Dusri date": "दूसरी तारीख़", "Score: # / #": "स्कोर: # / #", "Score": "स्कोर", "Galat!": "गलत!", "Sahi jawab": "सही जवाब", "Pehle apna jawab likho.": "पहले अपना जवाब लिखो।", "Pehle kuch text likho ya paste karo.": "पहले कुछ टेक्स्ट लिखो या पेस्ट करो।", "Words": "शब्द", "Characters": "अक्षर", "Characters (bina space): #": "अक्षर (बिना स्पेस): #", "Sentences: #": "वाक्य: #", "Paragraphs: #": "अनुच्छेद: #", "Lines: #": "पंक्तियाँ: #", "Padhne me lagbhag: # second": "पढ़ने में लगभग: # सेकंड", "Padhne me lagbhag: # minute": "पढ़ने में लगभग: # मिनट", "Dono dates ke din, mahina aur saal chuno.": "दोनों तारीख़ों के दिन, महीना और साल चुनो।", "Koi date sahi nahi hai (is mahine me itne din nahi hote).": "कोई तारीख़ सही नहीं है (इस महीने में इतने दिन नहीं होते)।", "Dono date ek hi hain. Fark": "दोनों तारीख़ एक ही हैं। फ़र्क", "Fark": "फ़र्क", "Kul hafte: # aur # din": "कुल हफ़्ते: # और # दिन", "Kul mahine: #": "कुल महीने: #", "Friday": "शुक्रवार", "Sunday": "रविवार", "Monday": "सोमवार", "Tuesday": "मंगलवार", "Wednesday": "बुधवार", "Thursday": "गुरुवार", "Saturday": "शनिवार", "Saal ka din number: #": "साल का दिन नंबर: #", "Ye saal leap year hai": "ये साल लीप ईयर है", "Ye saal leap year nahi hai": "ये साल लीप ईयर नहीं है", "Ye date aaj hi hai": "ये तारीख़ आज ही है", "Aaj se # din baad": "आज से # दिन बाद", "Aaj se # din pehle": "आज से # दिन पहले", "Pehle value likho.": "पहले वैल्यू लिखो।", "Isse kam temperature nahi hota (−# °C se neeche).": "इससे कम तापमान नहीं होता (−# °C से नीचे)।", "Kitne tak ka pahada chahiye? # se # ke beech likho.": "कितने तक का पहाड़ा चाहिए? # से # के बीच लिखो।", "Range sahi likho (zyada se zyada # numbers), jaise #, #.": "रेंज सही लिखो (ज़्यादा से ज़्यादा # संख्याएँ), जैसे #, #।", "Do number likho, comma se alag karke.": "दो नंबर लिखो, कॉमा से अलग करके।", "Koi badlav nahi": "कोई बदलाव नहीं", "# se # tak": "# से # तक", "Badlav": "बदलाव", "badha": "बढ़ा", "ghata": "घटा", "Farak = #": "फ़र्क = #", "Purana number # nahi ho sakta.": "पुराना नंबर # नहीं हो सकता।", "# ka #": "# का #", "#, # ka percent": "#, # का प्रतिशत", "B number # nahi ho sakta.": "B नंबर # नहीं हो सकता।", "# me #% badhane par": "# में #% बढ़ाने पर", "# me #% ghatane par": "# में #% घटाने पर", "Naya number": "नया नंबर", "Badhotri = #": "बढ़ोतरी = #", "Kami = #": "कमी = #", "Percent # se zyada nahi ghata sakte.": "प्रतिशत # से ज़्यादा नहीं घटा सकते।", "Pehla number # se bada hona chahiye.": "पहला नंबर # से बड़ा होना चाहिए।", "Na profit, na loss. CP = SP": "न लाभ, न हानि। CP = SP", "Profit %": "लाभ %", "Loss %": "हानि %", "SP = CP ka #": "SP = CP का #", "CP = #, Profit = #": "CP = #, लाभ = #", "CP = #, Loss = #": "CP = #, हानि = #", "SP = #, Profit = #": "SP = #, लाभ = #", "SP = #, Loss = #": "SP = #, हानि = #", "Profit = #": "लाभ = #", "Loss = #": "हानि = #", "SP": "SP", "CP": "CP", "Loss #% se zyada nahi ho sakta.": "हानि #% से ज़्यादा नहीं हो सकती।", "Loss #% se kam likho.": "हानि #% से कम लिखो।", "Discount #% se zyada nahi ho sakta.": "छूट #% से ज़्यादा नहीं हो सकती।", "Marked price = #, Discount = #": "अंकित मूल्य = #, छूट = #", "Selling price": "बिक्री मूल्य", "Bachat = #": "बचत = #", "Kam se kam # numbers likho, comma se alag karke.": "कम से कम # नंबर लिखो, कॉमा से अलग करके।", "Sum = #": "योग = #", "Average (Mean)": "औसत (Mean)", "Median": "माध्यिका (Median)", "Mode": "बहुलक (Mode)", "Mode: koi nahi (sab alag hain)": "बहुलक: कोई नहीं (सब अलग हैं)", "Range = #": "परास (Range) = #", "Smallest = #, Largest = #": "सबसे छोटा = #, सबसे बड़ा = #", "Do number likho: n, r jaise #, #.": "दो नंबर लिखो: n, r जैसे #, #।", "Sirf poore positive numbers likho.": "सिर्फ़ पूरे धनात्मक नंबर लिखो।", "r, n se bada nahi ho sakta.": "r, n से बड़ा नहीं हो सकता।", "n # tak hi chalega.": "n # तक ही चलेगा।", "Is number me galat digit hai": "इस नंबर में गलत अंक है", "Binary me sirf # aur # chalta hai.": "बाइनरी में सिर्फ़ # और # चलता है।", "Octal me # se # tak chalta hai.": "अष्टाधारी में # से # तक चलता है।", "Sahi digits likho.": "सही अंक लिखो।", "Pehle likho.": "पहले लिखो।", "Roman me # se # tak hi likhte hain.": "रोमन में # से # तक ही लिखते हैं।", "Sirf I, V, X, L, C, D, M likho.": "सिर्फ़ I, V, X, L, C, D, M लिखो।", "Ye sahi Roman number nahi hai.": "ये सही रोमन नंबर नहीं है।", "Sahi rup": "सही रूप", "Teen number likho: pehla, antar (ya ratio), n.": "तीन नंबर लिखो: पहला, अंतर (या अनुपात), n।", "n # se # ke beech ka poora number hona chahiye.": "n # से # के बीच का पूरा नंबर होना चाहिए।", "n-th term": "n-वाँ पद", "Sum of n terms": "n पदों का योग", "Infinite sum": "अनंत योग", "Number bahut bada ho gaya. n ya ratio chhota rakho.": "संख्या बहुत बड़ी हो गई। n या अनुपात छोटा रखो।", "Is shape ke liye # number chahiye (comma se alag).": "इस आकृति के लिए # नंबर चाहिए (कॉमा से अलग)।", "Sab numbers # se bade likho.": "सब नंबर # से बड़े लिखो।", "Ye # sides se triangle nahi banega.": "इन # भुजाओं से त्रिभुज नहीं बनेगा।", "Area (Heron)": "क्षेत्रफल (हीरोन)", "Perimeter": "परिमाप", "Circumference": "परिधि", "Diameter = #": "व्यास = #", "Diagonal = #": "विकर्ण = #", "Total surface area": "कुल पृष्ठीय क्षेत्रफल", "Lateral surface area = #": "पार्श्व पृष्ठीय क्षेत्रफल = #", "Curved surface area": "वक्र पृष्ठीय क्षेत्रफल", "Surface area": "पृष्ठीय क्षेत्रफल", "Slant height = #": "तिर्यक ऊँचाई = #", "Kam se kam bill aur tip % likho (log optional).": "कम से कम बिल और टिप % लिखो (लोग ज़रूरी नहीं)।", "Bill # se bada, tip # ya zyada aur log poora number likho.": "बिल # से बड़ा, टिप # या ज़्यादा और लोग पूरा नंबर लिखो।", "Tip": "टिप", "Total bill": "कुल बिल", "Har ek ka hissa": "हर एक का हिस्सा", "Ek hi vyakti hai": "सिर्फ़ एक ही व्यक्ति है", "Min aur Max likho, jaise #, #.": "न्यूनतम और अधिकतम लिखो, जैसे #, #।", "Range sahi likho.": "रेंज सही लिखो।", "Random number": "रैंडम नंबर", "Range: # se #": "रेंज: # से #", "Dobara dabao to naya number aayega": "दोबारा दबाओ तो नया नंबर आएगा", "Ek baar me # dice tak.": "एक बार में # पासे तक।", "Total = #": "कुल = #", "Ek dice": "एक पासा", "Ek baar me # coin tak.": "एक बार में # सिक्के तक।", "Heads: #, Tails: #": "चित: #, पट: #", "Dobara uchhalo": "दोबारा उछालो", "Percentage": "प्रतिशत", "Shandar!": "शानदार!", "Bahut badhiya": "बहुत बढ़िया", "Achha hai": "अच्छा है", "Pass, aur mehnat karo": "पास, और मेहनत करो", "Pass hone ke liye #% chahiye": "पास होने के लिए #% चाहिए", "#% of # marks": "#% (कुल # अंक में से)", "# / # marks": "# / # अंक", "Percent # se # ke beech likho.": "प्रतिशत # से # के बीच लिखो।", "Mile hue marks total se zyada nahi ho sakte.": "मिले हुए अंक कुल से ज़्यादा नहीं हो सकते।", "Total marks # se bade likho.": "कुल अंक # से बड़े लिखो।", "Teen number likho: total, mile hue, target %.": "तीन नंबर लिखो: कुल, मिले हुए, लक्ष्य %।", "Total # se bada, target % # se # ke beech likho.": "कुल # से बड़ा और लक्ष्य % # से # के बीच लिखो।", "Target marks: #": "लक्ष्य अंक: #", "Aap target tak pahunch chuke ho": "आप लक्ष्य तक पहुँच चुके हो", "Aur chahiye": "और चाहिए", "Itne marks bache hi nahi (bache: #). Target mushkil hai": "इतने अंक बचे ही नहीं (बचे: #)। लक्ष्य मुश्किल है", "Abhi tak: #": "अभी तक: #", "Bache hue marks me se #% lana hoga": "बचे हुए अंकों में से #% लाने होंगे", "Teen number likho: total sawal, marks/sawal, target (negative optional).": "तीन नंबर लिखो: कुल सवाल, अंक/सवाल, लक्ष्य (नेगेटिव ज़रूरी नहीं)।", "Numbers sahi likho.": "नंबर सही लिखो।", "Target total marks se zyada hai (#).": "लक्ष्य कुल अंकों से ज़्यादा है (#)।", "Target = # marks": "लक्ष्य = # अंक", "Sab sawal attempt karo to kam se kam": "सारे सवाल करो तो कम से कम", "sahi chahiye": "सही चाहिए", "Accuracy chahiye: #": "सटीकता चाहिए: #", "Har galat par −# marks": "हर गलत पर −# अंक", "Negative marking nahi": "नेगेटिव मार्किंग नहीं", "foot": "फुट", "inch": "इंच", "yard": "गज़", "mile": "मील", "quintal": "क्विंटल", "tonne": "टन", "pound": "पाउंड", "ounce": "औंस", "sq foot": "वर्ग फुट", "sq yard": "वर्ग गज़", "hectare": "हेक्टेयर", "acre": "एकड़", "litre": "लीटर", "gallon (US)": "गैलन (US)", "cup (# ml)": "कप (# ml)", "second": "सेकंड", "minute": "मिनट", "hour": "घंटा", "day": "दिन", "week": "सप्ताह", "year": "वर्ष", "knot": "नॉट", "bit": "बिट", "byte": "बाइट"});
+
+Object.assign(LANGD,{'Ghatao':'घटाओ','of Number':'संख्या का','Kitna':'कितना'});if(!LANGD['Badhao'])LANGD['Badhao']='बढ़ाओ';
+var QUH={'foot':'फुट','inch':'इंच','yard':'गज़','mile':'मील','quintal':'क्विंटल','tonne':'टन','pound':'पाउंड','ounce':'औंस','sq foot':'वर्ग फुट','sq yard':'वर्ग गज़','hectare':'हेक्टेयर','acre':'एकड़','litre':'लीटर','gallon (US)':'गैलन (US)','cup (250 ml)':'कप (250 ml)','second':'सेकंड','minute':'मिनट','hour':'घंटा','day':'दिन','week':'सप्ताह','year':'वर्ष','knot':'नॉट','bit':'बिट','byte':'बाइट'};
+LANGR.push([/^(.+?): ([\d.,e+\-]+)$/,function(m){return QUH[m[1]]?QUH[m[1]]+': '+m[2]:null}]);
+LANGR.push([/^([\d.,e+\-]+) (.+)$/,function(m){return QUH[m[2]]?m[1]+' '+QUH[m[2]]:null}]);
+LANGR.push([/^Total numbers: (\d+) \(sorted: (.*)\)$/,function(m){return 'कुल संख्याएँ: '+m[1]+' (क्रम से: '+m[2]+')'}]);
+LANGR.push([/^Series: (.*)$/,function(m){return 'श्रेणी: '+m[1]}]);
+LANGR.push([/^((?:Heads|Tails)(?:, (?:Heads|Tails))*)$/,function(m){return m[1].replace(/Heads/g,'चित').replace(/Tails/g,'पट')}]);
 function enSetLang(l){try{lnFrameInit();lnFrameRun()}catch(e){}}
 function lnBoot(){document.documentElement.lang=langIsHi()?'hi':'en';lnInit();lnQueue()}
 function lnSetLang(l){S.lang=l;try{save()}catch(e){}document.documentElement.lang=l==='hi'?'hi':'en';enSetLang(l);render();if(sheet)drawSheet()}

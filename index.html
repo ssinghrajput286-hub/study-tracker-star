@@ -13728,9 +13728,12 @@ var SPN={ph:'phrases',dl:'dialogues',pr:'words',iv:'questions',hx:'sentences',mk
 function nativeSay(t,lang,rate){try{if(window.AndroidBridge&&AndroidBridge.speak)return AndroidBridge.speak(String(t),lang,rate)}catch(e){}return false}
 function spSay(t,slow){if(nativeSay(t,'en-IN',slow?.55:.9))return;try{var u=new SpeechSynthesisUtterance(t);u.lang='en-IN';u.rate=slow?.55:.9;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){toast('Is phone me awaaz nahi bol sakta. Phone ki Settings me Text-to-speech engine (Google) install/on karo')}}
 function spNorm(s){return s.toLowerCase().replace(/[^a-z0-9' ]/g,' ').split(/\s+/).filter(Boolean)}
-function spCmp(target,said){var t=spNorm(target),s=spNorm(said),used={},ok=0,h='';
- t.forEach(function(w){var hit=false;for(var i=0;i<s.length;i++)if(s[i]===w&&!used[i]){used[i]=1;hit=true;break}if(hit)ok++;h+='<span class="'+(hit?'sg':'sb')+'">'+esc(w)+'</span> '});
- return {pc:t.length?Math.round(ok*100/t.length):0,h:h}}
+function spCmp(target,said){var t=spNorm(target),s=spNorm(said),n=t.length,m=s.length,d=[],i,j,h='',hit={};
+ for(i=0;i<=n;i++){d.push([]);for(j=0;j<=m;j++)d[i].push(0)}
+ for(i=1;i<=n;i++)for(j=1;j<=m;j++)d[i][j]=t[i-1]===s[j-1]?d[i-1][j-1]+1:Math.max(d[i-1][j],d[i][j-1]);
+ i=n;j=m;while(i>0&&j>0){if(t[i-1]===s[j-1]){hit[i-1]=1;i--;j--}else if(d[i-1][j]>=d[i][j-1])i--;else j--}
+ t.forEach(function(w,k){h+='<span class="'+(hit[k]?'sg':'sb')+'">'+esc(w)+'</span> '});
+ return {pc:n?Math.round(d[n][m]*100/Math.max(n,m)):0,h:h}}
 var spRecObj=null;
 function spMic(key){var tx=SPT[key]||'',SR=window.SpeechRecognition||window.webkitSpeechRecognition,box=document.getElementById('spr-'+key);if(!box)return;
  if(!SR){box.innerHTML='<div class="spn">🎤 Is phone me auto-check nahi chal sakta. <b>Self-check:</b> 🔊 sunkar zor se bolo, phir ✅ dabao. (Chrome/Google app wale phone me mic-check chalta hai.)</div>';return}
